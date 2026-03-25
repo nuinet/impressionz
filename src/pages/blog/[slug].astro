@@ -99,7 +99,24 @@ const articleSchema = {
     <h1 class="font-serif text-4xl font-bold text-gray-900 mb-3">{post.title}</h1>
     {post.date && <p class="text-sm text-gray-400 mb-10">{fmtDate(post.date)}</p>}
 
-    <div class="substack-content" set:html={post.content} />
+    {post.content.replace(/<[^>]+>/g, "").trim() === "" ? (
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center my-8">
+        <svg class="w-12 h-12 text-[#006400] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+        </svg>
+        <p class="text-gray-600 mb-4">This post contains a video — watch it on Substack.</p>
+        <a
+          href={post.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-block bg-[#303a4d] hover:bg-[#006400] text-white font-bold px-6 py-3 rounded-[30px] transition-colors text-sm"
+        >
+          Watch on Substack ↗
+        </a>
+      </div>
+    ) : (
+      <div class="substack-content" set:html={post.content} />
+    )}
 
     <div class="mt-12 pt-8 border-t border-gray-200 flex items-center justify-between">
       <a href="/blog/" class="text-sm text-[#006400] hover:underline">← Back to blog</a>

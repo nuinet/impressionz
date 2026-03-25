@@ -1,3 +1,5 @@
+import { parse } from "node-html-parser";
+
 const FEED_URL = "https://mackenzier.substack.com/feed";
 
 export interface SubstackPost {
@@ -8,6 +10,7 @@ export interface SubstackPost {
   content: string;
   link: string;
   thumbnail: string | null;
+  enclosureType: string | null;
 }
 
 function extractSlug(link: string): string {
@@ -22,6 +25,27 @@ function extractFirstImage(html: string): string | null {
 
 function stripTags(html: string): string {
   return html.replace(/<[^>]+>/g, "").trim();
+}
+
+function sanitizeContent(html: string): string {
+  if (!html.trim()) return html;
+  const root = parse(html);
+
+  // Remove Substack subscription widgets
+  root.querySelectorAll(".subscription-widget-wrap-editor, .subscription-widget-wrap, .subscription-widget").forEach(el => el.remove());
+
+  // Remove Substack subscribe CTA divs
+  root.querySelectorAll("[data-component-name='SubscribeWidgetToDOM']").forEach(el => el.remove());
+
+  // Remove "Thanks for reading" / subscribe nudge paragraphs
+  root.querySelectorAll("p").forEach(p => {
+    const text = p.text.toLowerCase();
+    if (text.includes("subscribe for free") || text.includes("thanks for reading")) {
+      p.remove();
+    }
+  });
+
+  return root.innerHTML;
 }
 
 function getField(itemXml: string, tag: string): string {
@@ -50,8 +74,10 @@ function parseItems(xml: string): SubstackPost[] {
     const slug = extractSlug(link);
     if (!slug) continue;
 
-    const content = getField(item, "content:encoded") || getField(item, "description");
+    const content = sanitizeContent(getField(item, "content:encoded") || getField(item, "description"));
     const description = stripTags(getField(item, "description")).slice(0, 200);
+    const enclosureMatch = item.match(/<enclosure[^>]+type="([^"]+)"/);
+    const enclosureType = enclosureMatch ? enclosureMatch[1] : null;
 
     posts.push({
       slug,
@@ -61,6 +87,7 @@ function parseItems(xml: string): SubstackPost[] {
       content,
       link,
       thumbnail: extractFirstImage(content),
+      enclosureType,
     });
   }
 

@@ -13,7 +13,8 @@ const { beforeSrc, afterSrc, beforeAlt, afterAlt } = Astro.props;
   class="relative select-none overflow-hidden rounded-lg shadow-lg max-w-3xl mx-auto aspect-[16/9] cursor-col-resize"
   id="ba-slider"
   role="img"
-  aria-label="Before and after comparison slider"
+  aria-label="Before and after comparison — use arrow keys to adjust"
+  tabindex="0"
 >
   <!-- After image (full width, base layer) -->
   <img
@@ -68,4 +69,14 @@ const { beforeSrc, afterSrc, beforeAlt, afterAlt } = Astro.props;
   slider.addEventListener("touchstart", (e) => { dragging = true; setPosition(e.touches[0]!.clientX); }, { passive: true });
   window.addEventListener("touchend", () => { dragging = false; });
   window.addEventListener("touchmove", (e) => { if (dragging) setPosition(e.touches[0]!.clientX); }, { passive: true });
+
+  let pct = 50;
+  slider.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { pct = Math.min(pct + 5, 100); }
+    else if (e.key === "ArrowLeft") { pct = Math.max(pct - 5, 0); }
+    else return;
+    e.preventDefault();
+    before.style.clipPath = `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`;
+    divider.style.left = `${pct}%`;
+  });
 </script>

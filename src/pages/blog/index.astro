@@ -41,7 +41,7 @@ const fmtDate = (iso: string) => {
           {post.thumbnail && (
             <img
               src={post.thumbnail}
-              alt=""
+              alt={post.title}
               class="w-28 h-28 object-cover rounded flex-shrink-0"
               loading="lazy"
             />

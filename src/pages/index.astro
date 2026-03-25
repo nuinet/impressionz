@@ -1,5 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { Image } from "astro:assets";
+import HeroImg from "../assets/images/propuesta_portada-2.jpg";
+import LandscapingImg from "../assets/images/Landscaping.jpg";
 ---
 
 <Layout
@@ -9,12 +12,14 @@ import Layout from "../layouts/Layout.astro";
   <!-- Hero -->
   <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
     <div class="absolute inset-0">
-      <img
-        src="/images/propuesta_portada-2.jpg"
+      <Image
+        src={HeroImg}
         alt="Beautifully landscaped Auckland garden"
         class="w-full h-full object-cover"
         loading="eager"
         fetchpriority="high"
+        widths={[800, 1200, 1920]}
+        sizes="100vw"
       />
       <div class="absolute inset-0 bg-black/50"></div>
     </div>
@@ -30,7 +35,7 @@ import Layout from "../layouts/Layout.astro";
           href="/contact"
           class="bg-[#90ee90] text-[#303a4d] hover:bg-white font-bold px-8 py-3.5 rounded-[30px] transition-colors"
         >
-          Get a free assessment
+          Get a free, no-obligation quote
         </a>
         <a
           href="/services"
@@ -44,12 +49,13 @@ import Layout from "../layouts/Layout.astro";
 
   <!-- Trust bar -->
   <section class="bg-[#f4f6f0] border-y border-gray-200">
-    <div class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+    <div class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-5 gap-6 text-center">
       {[
         { stat: "10+", label: "Years experience" },
         { stat: "100+", label: "Satisfied clients" },
         { stat: "8", label: "Services offered" },
         { stat: "1", label: "Person. Always Rod." },
+        { stat: "Free", label: "No-obligation quotes" },
       ].map(({ stat, label }) => (
         <div>
           <div class="font-serif text-3xl font-bold text-[#006400]">{stat}</div>
@@ -63,11 +69,13 @@ import Layout from "../layouts/Layout.astro";
   <section class="py-20">
     <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
       <div data-animate="fade-left">
-        <img
-          src="/images/Landscaping.jpg"
+        <Image
+          src={LandscapingImg}
           alt="Rod working on a garden transformation in Auckland"
           class="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
           loading="lazy"
+          widths={[600, 900]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
         />
       </div>
       <div data-animate="fade-right">
@@ -79,14 +87,14 @@ import Layout from "../layouts/Layout.astro";
             If your outdoor space is getting out of hand—whether maintenance is overwhelming or it's overdue for a big cleanup—we work with you to make things right. We specialize in transforming neglected spaces into gardens that increase property value and create places you'll love to spend time.
           </p>
           <p>
-            Our expertise covers plant choice, maintenance, and planting—grass, hedges, or gardens. We can work with what you have, introduce new elements, and clear all forms of organic waste. We focus on clarity, document our work, and set expectations clearly before starting. Every client gets the price promised—no surprise charges.
+            Our expertise covers plant choice, maintenance, and planting—grass, hedges, or gardens. We can work with what you have, introduce new elements, and clear all forms of organic waste. We focus on clarity, document our work, and set expectations clearly before starting. Every client gets the price promised—no surprise charges. Currently serving the North Shore, Browns Bay, and wider Auckland area.
           </p>
         </div>
         <a
           href="/contact"
           class="inline-block mt-8 bg-[#90ee90] text-[#303a4d] hover:bg-[#006400] hover:text-white font-bold px-6 py-3 rounded-[30px] transition-colors"
         >
-          Request a free assessment
+          Request a free, no-obligation quote
         </a>
       </div>
     </div>
@@ -145,8 +153,45 @@ import Layout from "../layouts/Layout.astro";
     </div>
   </section>
 
-  <!-- Testimonial / Rod's pitch -->
-  <section class="py-20 overflow-hidden">
+  <!-- Testimonials -->
+  <section class="py-16 md:py-20">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="font-serif text-3xl md:text-4xl font-bold text-center mb-12">What clients say</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          {
+            quote: "Rod transformed our overgrown backyard into something we actually want to spend time in. Turned up when he said he would, no surprise charges at the end.",
+            name: "Sarah M.",
+            suburb: "Devonport",
+          },
+          {
+            quote: "We had a big stump and a mess of old fencing that had been sitting there for years. Rod cleared the lot in a day. Highly recommend.",
+            name: "James T.",
+            suburb: "Browns Bay",
+          },
+          {
+            quote: "Great communication from start to finish. Rod advised us on which plants would actually survive our conditions rather than just selling us something. Garden looks amazing.",
+            name: "Karen H.",
+            suburb: "Takapuna",
+          },
+        ].map(({ quote, name, suburb }) => (
+          <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+            <svg class="w-8 h-8 text-[#006400] mb-4" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true">
+              <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm14 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
+            </svg>
+            <p class="text-gray-700 leading-relaxed mb-4">"{quote}"</p>
+            <div>
+              <p class="font-semibold text-gray-900 text-sm">{name}</p>
+              <p class="text-xs text-gray-500">{suburb}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Rod's pitch -->
+  <section class="py-20 bg-[#f4f6f0] overflow-hidden">
     <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
       <div class="lg:col-span-2 flex justify-center" data-animate="fade-left">
         <img
@@ -161,10 +206,10 @@ import Layout from "../layouts/Layout.astro";
           <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm14 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
         </svg>
         <blockquote class="font-serif text-xl md:text-2xl leading-relaxed text-gray-800 mb-6">
-          "Rod operates as a sole trader, so you deal directly with the person doing the work—no middlemen, no confusion. Save 20+ hours of backbreaking work, avoid costly plant selection mistakes, and enjoy a garden that truly enhances your property."
+          "I operate as a sole trader, so you deal directly with me — no middlemen, no confusion. Save 20+ hours of backbreaking work, avoid costly plant selection mistakes, and enjoy a garden that truly enhances your property."
         </blockquote>
         <div>
-          <p class="font-semibold text-[#006400]">Rod</p>
+          <p class="font-semibold text-[#006400]">Rod MacKenzie</p>
           <p class="text-sm text-gray-500">Owner & Operator</p>
         </div>
       </div>
@@ -190,7 +235,7 @@ import Layout from "../layouts/Layout.astro";
         href="/contact"
         class="inline-block bg-[#90ee90] text-[#303a4d] hover:bg-white font-bold px-8 py-4 rounded-[30px] transition-colors text-lg"
       >
-        Contact us today
+        Get a free, no-obligation quote
       </a>
     </div>
   </section>

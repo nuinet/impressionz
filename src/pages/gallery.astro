@@ -1,0 +1,160 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const images = [
+  { src: "/images/Landscaping.jpg", alt: "Landscaping project" },
+  { src: "/images/path.jpg", alt: "Garden path" },
+  { src: "/images/planting.jpg", alt: "Planting" },
+  { src: "/images/stairs.jpg", alt: "Garden stairs" },
+  { src: "/images/piscina.jpg", alt: "Garden with pool area" },
+  { src: "/images/Antes 1.jpg", alt: "Before — garden transformation" },
+  { src: "/images/Después 1.jpg", alt: "After — garden transformation" },
+  { src: "/images/Gardening.jpg", alt: "Gardening work" },
+  { src: "/images/P1040435.jpg", alt: "Garden project" },
+];
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://impressionz.co.nz/" },
+    { "@type": "ListItem", position: 2, name: "Gallery", item: "https://impressionz.co.nz/gallery/" },
+  ],
+};
+---
+
+<Layout
+  title="Gallery — ImpressioNZ Outdoors"
+  description="Photos of garden transformations, landscaping, planting, and maintenance work by Rod MacKenzie in Auckland."
+  schema={breadcrumbSchema}
+>
+  <section class="py-16 px-4 max-w-6xl mx-auto">
+    <h1 class="font-serif text-4xl font-bold text-[#006400] mb-2">Gallery</h1>
+    <p class="text-gray-600 mb-10">A selection of garden transformations and projects across Auckland.</p>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {images.map((img, i) => (
+        <button
+          class="group aspect-[4/3] overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-[#006400]"
+          data-gallery-index={i}
+          aria-label={`View ${img.alt}`}
+        >
+          <img
+            src={img.src}
+            alt={img.alt}
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div
+    id="lightbox"
+    class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Image lightbox"
+  >
+    <button
+      id="lb-close"
+      class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors p-2"
+      aria-label="Close lightbox"
+    >
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <button
+      id="lb-prev"
+      class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2"
+      aria-label="Previous image"
+    >
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+
+    <div class="max-w-5xl max-h-[85vh] mx-16 flex items-center justify-center">
+      <img id="lb-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded" />
+    </div>
+
+    <button
+      id="lb-next"
+      class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors p-2"
+      aria-label="Next image"
+    >
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+
+    <div id="lb-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-medium"></div>
+  </div>
+</Layout>
+
+<script>
+  const images = [
+    { src: "/images/Landscaping.jpg", alt: "Landscaping project" },
+    { src: "/images/path.jpg", alt: "Garden path" },
+    { src: "/images/planting.jpg", alt: "Planting" },
+    { src: "/images/stairs.jpg", alt: "Garden stairs" },
+    { src: "/images/piscina.jpg", alt: "Garden with pool area" },
+    { src: "/images/Antes 1.jpg", alt: "Before — garden transformation" },
+    { src: "/images/Después 1.jpg", alt: "After — garden transformation" },
+    { src: "/images/Gardening.jpg", alt: "Gardening work" },
+    { src: "/images/P1040435.jpg", alt: "Garden project" },
+  ];
+
+  const lightbox = document.getElementById("lightbox")!;
+  const lbImg = document.getElementById("lb-img") as HTMLImageElement;
+  const lbCounter = document.getElementById("lb-counter")!;
+  let current = 0;
+
+  function open(index: number) {
+    current = index;
+    update();
+    lightbox.classList.remove("hidden");
+    lightbox.classList.add("flex");
+    document.body.style.overflow = "hidden";
+    document.getElementById("lb-close")!.focus();
+  }
+
+  function close() {
+    lightbox.classList.add("hidden");
+    lightbox.classList.remove("flex");
+    document.body.style.overflow = "";
+  }
+
+  function update() {
+    const img = images[current]!;
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lbCounter.textContent = `${current + 1} / ${images.length}`;
+  }
+
+  function prev() { current = (current - 1 + images.length) % images.length; update(); }
+  function next() { current = (current + 1) % images.length; update(); }
+
+  document.querySelectorAll("[data-gallery-index]").forEach((btn) => {
+    btn.addEventListener("click", () => open(Number((btn as HTMLElement).dataset.galleryIndex)));
+  });
+
+  document.getElementById("lb-close")!.addEventListener("click", close);
+  document.getElementById("lb-prev")!.addEventListener("click", prev);
+  document.getElementById("lb-next")!.addEventListener("click", next);
+
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) close();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (lightbox.classList.contains("hidden")) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowLeft") prev();
+    else if (e.key === "ArrowRight") next();
+  });
+</script>

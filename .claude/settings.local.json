@@ -11,7 +11,9 @@
       "Bash(cd:*)",
       "Bash(npm uninstall:*)",
       "Bash(npm list:*)",
-      "Bash(curl -s \"https://mackenzier.substack.com/feed\")"
+      "Bash(curl -s \"https://mackenzier.substack.com/feed\")",
+      "Bash(grep -oP '\\(?<=video\\)[^<]{0,300}')",
+      "Bash(grep -o 'simple-joy.\\\\{0,3000\\\\}')"
     ]
   }
 }
