@@ -4,23 +4,61 @@ DirectoryIndex index.html
 ErrorDocument 404 /404.html
 ErrorDocument 503 /maintenance.html
 
-# Gzip compression
+# ---------------------------------------------------------------------------
+# Compression
+# ---------------------------------------------------------------------------
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript text/xml application/xml application/json image/svg+xml
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
 </IfModule>
 
-# Cache-Control headers
+# ---------------------------------------------------------------------------
+# Cache-Control
+# ---------------------------------------------------------------------------
 <IfModule mod_headers.c>
-  # Content-hashed assets — cache forever
+  # Content-hashed assets (_astro/ filenames contain hash) — safe to cache forever
   <FilesMatch "\.(webp|woff2|woff|js|css|png|jpg|jpeg|gif|svg|ico)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
-  # HTML — always revalidate
+  # HTML — always revalidate so updated pages are picked up immediately
   <FilesMatch "\.html$">
     Header set Cache-Control "public, max-age=0, must-revalidate"
   </FilesMatch>
 </IfModule>
 
+# ---------------------------------------------------------------------------
+# Security headers
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  # Force HTTPS for 1 year on this origin (no subdomains — too risky without auditing all of them)
+  Header always set Strict-Transport-Security "max-age=31536000"
+
+  # Clickjacking — block all framing (also satisfies XFO requirement)
+  Header always set X-Frame-Options "DENY"
+  Header always set Content-Security-Policy "frame-ancestors 'none'"
+
+  # Isolate browsing context from cross-origin pop-ups
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+
+  # Prevent MIME-type sniffing
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Control referrer information sent to third parties
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Disable unused browser features
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+
+  # Content Security Policy
+  # script-src needs 'unsafe-inline' because Astro inlines component scripts into the HTML at build time.
+  # style-src needs 'unsafe-inline' because Tailwind utility classes appear as style= attributes (e.g. slider clip-path).
+  # img-src allows https: to cover Substack CDN thumbnails in blog posts.
+  # connect-src allows Web3Forms for the contact form submission.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://api.web3forms.com; object-src 'none'; base-uri 'self'; form-action 'self' https://api.web3forms.com; upgrade-insecure-requests"
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# URL rewriting (clean URLs for Astro static output)
+# ---------------------------------------------------------------------------
 RewriteEngine On
 RewriteBase /
 RewriteCond %{REQUEST_FILENAME} !-f
