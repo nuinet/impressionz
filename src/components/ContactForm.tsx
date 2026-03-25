@@ -38,31 +38,26 @@ const hiringOptions = [
   { value: "going_to_hire", label: "Ready to proceed" },
 ];
 
-const hiringLabels: Record<string, string> = {
-  researching: "Just researching",
-  thinking: "Thinking about it",
-  might_hire: "Likely to hire",
-  going_to_hire: "Ready to proceed",
-};
-
 function RadioGroup({
   name,
   options,
   register,
   error,
+  grid,
 }: {
   name: string;
   options: { value: string; label: string }[];
   register: ReturnType<typeof useForm>["register"];
   error?: string;
+  grid?: boolean;
 }) {
   return (
     <div>
-      <div className="flex flex-wrap gap-3">
+      <div className={grid ? "grid grid-cols-2 gap-2" : "flex flex-wrap gap-2"}>
         {options.map(({ value, label }) => (
           <label key={value} className="relative">
             <input type="radio" value={value} {...register(name)} className="peer sr-only" />
-            <span className="block text-sm px-4 py-2 rounded border border-gray-200 cursor-pointer transition-colors peer-checked:border-[#006400] peer-checked:bg-green-50 peer-checked:text-[#006400] peer-checked:font-medium hover:border-gray-300">
+            <span className="block text-sm px-3 py-2 rounded-lg border border-gray-200 cursor-pointer transition-colors peer-checked:border-[#006400] peer-checked:bg-green-50 peer-checked:text-[#006400] peer-checked:font-medium hover:border-gray-300 text-center">
               {label}
             </span>
           </label>
@@ -72,6 +67,14 @@ function RadioGroup({
     </div>
   );
 }
+
+const toBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -107,7 +110,6 @@ export default function ContactForm() {
 
     setFileError(errs[0] ?? "");
     setFiles(next);
-    // Reset the input so the same file can be re-added after removal
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -119,27 +121,32 @@ export default function ContactForm() {
   const onSubmit = async (data: FormValues) => {
     setServerError("");
 
-    const body = new FormData();
-    body.append("access_key", import.meta.env.PUBLIC_WEB3FORMS_KEY);
-    body.append("subject", `New enquiry from ${data.name} — ${data.suburb}`);
-    body.append("from_name", "ImpressioNZ Outdoors Website");
-    body.append("replyto", data.email);
-    body.append("Name", data.name);
-    body.append("Email", data.email);
-    body.append("Phone", data.phone || "Not provided");
-    body.append("Suburb / Address", data.suburb);
-    body.append("Property owner?", data.propertyOwner === "yes" ? "Yes" : "No");
-    body.append("Waste removal needed?", data.wasteRemoval === "yes" ? "Yes" : "No");
-    body.append("Plants purchasing needed?", data.plantsPurchasing === "yes" ? "Yes" : "No");
-    body.append("How soon to proceed?", hiringLabels[data.hiringDecision]);
-    body.append("Additional details", data.additionalDetails || "—");
+    const encodedFiles = await Promise.all(
+      files.map(async (file) => ({
+        name: file.name,
+        type: file.type,
+        data: await toBase64(file),
+      }))
+    );
 
-    files.forEach((file) => body.append("attachment[]", file));
+    const payload = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone || undefined,
+      suburb: data.suburb,
+      propertyOwner: data.propertyOwner,
+      wasteRemoval: data.wasteRemoval,
+      plantsPurchasing: data.plantsPurchasing,
+      hiringDecision: data.hiringDecision,
+      additionalDetails: data.additionalDetails || undefined,
+      files: encodedFiles.length > 0 ? encodedFiles : undefined,
+    };
 
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch(`${import.meta.env.PUBLIC_WORKER_URL}/contact`, {
         method: "POST",
-        body,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const json = await res.json();
@@ -164,116 +171,132 @@ export default function ContactForm() {
     );
   }
 
-  const inputCls = "w-full border border-gray-300 rounded px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#006400] focus:border-transparent";
-  const labelCls = "block text-sm font-medium text-gray-700 mb-1";
+  const inputCls = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#006400] focus:border-transparent";
+  const labelCls = "block text-sm font-medium text-gray-700 mb-1.5";
+  const sectionHeadingCls = "text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6" aria-label="Enquiry form">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="name" className={labelCls}>Your name <span className="text-red-500" aria-hidden="true">*</span></label>
-          <input id="name" type="text" autoComplete="name" aria-required="true" {...register("name")} className={inputCls} />
-          {errors.name && <p role="alert" className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
-        </div>
-        <div>
-          <label htmlFor="email" className={labelCls}>Email address <span className="text-red-500" aria-hidden="true">*</span></label>
-          <input id="email" type="email" autoComplete="email" aria-required="true" {...register("email")} className={inputCls} />
-          {errors.email && <p role="alert" className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="phone" className={labelCls}>Phone number</label>
-          <input id="phone" type="tel" autoComplete="tel" {...register("phone")} className={inputCls} />
-        </div>
-        <div>
-          <label htmlFor="suburb" className={labelCls}>Suburb / address <span className="text-red-500" aria-hidden="true">*</span></label>
-          <input id="suburb" type="text" aria-required="true" {...register("suburb")} className={inputCls} />
-          {errors.suburb && <p role="alert" className="mt-1 text-xs text-red-600">{errors.suburb.message}</p>}
-        </div>
-      </div>
-
-      <fieldset>
-        <legend className={labelCls}>Are you the property owner? <span className="text-red-500" aria-hidden="true">*</span></legend>
-        <RadioGroup name="propertyOwner" options={yesNo} register={register} error={errors.propertyOwner?.message} />
-      </fieldset>
-
-      <fieldset>
-        <legend className={labelCls}>Do you need waste removal? <span className="text-red-500" aria-hidden="true">*</span></legend>
-        <RadioGroup name="wasteRemoval" options={yesNo} register={register} error={errors.wasteRemoval?.message} />
-      </fieldset>
-
-      <fieldset>
-        <legend className={labelCls}>Do you need plants purchased? <span className="text-red-500" aria-hidden="true">*</span></legend>
-        <RadioGroup name="plantsPurchasing" options={yesNo} register={register} error={errors.plantsPurchasing?.message} />
-      </fieldset>
-
-      <fieldset>
-        <legend className={labelCls}>How soon are you looking to proceed? <span className="text-red-500" aria-hidden="true">*</span></legend>
-        <RadioGroup name="hiringDecision" options={hiringOptions} register={register} error={errors.hiringDecision?.message} />
-      </fieldset>
-
+      {/* Contact details */}
       <div>
-        <label htmlFor="additionalDetails" className={labelCls}>
-          Additional details or specific requirements
-        </label>
-        <textarea id="additionalDetails" rows={4} {...register("additionalDetails")} placeholder="Access notes, specific requirements, any questions for Rod" className={`${inputCls} resize-y`} />
-        {errors.additionalDetails && <p role="alert" className="mt-1 text-xs text-red-600">{errors.additionalDetails.message}</p>}
-      </div>
-
-      <div>
-        <label className={labelCls}>
-          Photos <span className="text-gray-400 font-normal">(optional — up to {MAX_FILES}, {MAX_SIZE_MB} MB each)</span>
-        </label>
-        <div
-          className="border border-dashed border-gray-300 rounded px-4 py-6 text-center cursor-pointer hover:border-[#006400] transition-colors"
-          onClick={() => fileInputRef.current?.click()}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
-          role="button"
-          tabIndex={0}
-          aria-label="Upload photos"
-          onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
-        >
-          <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-          </svg>
-          <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-          <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP, HEIC</p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-            multiple
-            className="sr-only"
-            onChange={(e) => handleFiles(e.target.files)}
-            aria-hidden="true"
-          />
+        <p className={sectionHeadingCls}>Your details</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="name" className={labelCls}>Your name <span className="text-red-500" aria-hidden="true">*</span></label>
+            <input id="name" type="text" autoComplete="name" aria-required="true" {...register("name")} className={inputCls} />
+            {errors.name && <p role="alert" className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
+          </div>
+          <div>
+            <label htmlFor="email" className={labelCls}>Email address <span className="text-red-500" aria-hidden="true">*</span></label>
+            <input id="email" type="email" autoComplete="email" aria-required="true" {...register("email")} className={inputCls} />
+            {errors.email && <p role="alert" className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+          </div>
+          <div>
+            <label htmlFor="phone" className={labelCls}>Phone number</label>
+            <input id="phone" type="tel" autoComplete="tel" {...register("phone")} className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor="suburb" className={labelCls}>Suburb / address <span className="text-red-500" aria-hidden="true">*</span></label>
+            <input id="suburb" type="text" aria-required="true" {...register("suburb")} className={inputCls} />
+            {errors.suburb && <p role="alert" className="mt-1 text-xs text-red-600">{errors.suburb.message}</p>}
+          </div>
         </div>
-
-        {files.length > 0 && (
-          <ul className="mt-2 space-y-1">
-            {files.map((file, i) => (
-              <li key={i} className="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-1.5">
-                <span className="truncate text-gray-700">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  className="ml-3 text-gray-400 hover:text-red-500 flex-shrink-0"
-                  aria-label={`Remove ${file.name}`}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {fileError && <p role="alert" className="mt-1 text-xs text-red-600">{fileError}</p>}
       </div>
 
+      {/* Qualification questions — 2×2 grid */}
       <div>
+        <p className={sectionHeadingCls}>A few quick questions</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <fieldset className="bg-gray-50 rounded-lg p-4">
+            <legend className="text-sm font-medium text-gray-700 mb-2">Are you the property owner? <span className="text-red-500" aria-hidden="true">*</span></legend>
+            <RadioGroup name="propertyOwner" options={yesNo} register={register} error={errors.propertyOwner?.message} />
+          </fieldset>
+
+          <fieldset className="bg-gray-50 rounded-lg p-4">
+            <legend className="text-sm font-medium text-gray-700 mb-2">Do you need waste removal? <span className="text-red-500" aria-hidden="true">*</span></legend>
+            <RadioGroup name="wasteRemoval" options={yesNo} register={register} error={errors.wasteRemoval?.message} />
+          </fieldset>
+
+          <fieldset className="bg-gray-50 rounded-lg p-4">
+            <legend className="text-sm font-medium text-gray-700 mb-2">Do you need plants purchased? <span className="text-red-500" aria-hidden="true">*</span></legend>
+            <RadioGroup name="plantsPurchasing" options={yesNo} register={register} error={errors.plantsPurchasing?.message} />
+          </fieldset>
+
+          <fieldset className="bg-gray-50 rounded-lg p-4">
+            <legend className="text-sm font-medium text-gray-700 mb-2">How soon are you looking to proceed? <span className="text-red-500" aria-hidden="true">*</span></legend>
+            <RadioGroup name="hiringDecision" options={hiringOptions} register={register} error={errors.hiringDecision?.message} grid />
+          </fieldset>
+        </div>
+      </div>
+
+      {/* Details & upload */}
+      <div>
+        <p className={sectionHeadingCls}>More detail</p>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="additionalDetails" className={labelCls}>
+              Additional details or specific requirements
+            </label>
+            <textarea id="additionalDetails" rows={4} {...register("additionalDetails")} placeholder="Access notes, specific requirements, any questions for Rod" className={`${inputCls} resize-y`} />
+            {errors.additionalDetails && <p role="alert" className="mt-1 text-xs text-red-600">{errors.additionalDetails.message}</p>}
+          </div>
+
+          <div>
+            <label className={labelCls}>
+              Photos <span className="text-gray-400 font-normal">(optional — up to {MAX_FILES}, {MAX_SIZE_MB} MB each)</span>
+            </label>
+            <div
+              className="border border-dashed border-gray-300 rounded-lg px-4 py-8 text-center cursor-pointer hover:border-[#006400] transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
+              role="button"
+              tabIndex={0}
+              aria-label="Upload photos"
+              onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+            >
+              <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
+              <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP, HEIC</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                multiple
+                className="sr-only"
+                onChange={(e) => handleFiles(e.target.files)}
+                aria-hidden="true"
+              />
+            </div>
+
+            {files.length > 0 && (
+              <ul className="mt-2 space-y-1">
+                {files.map((file, i) => (
+                  <li key={i} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg px-3 py-1.5">
+                    <span className="truncate text-gray-700">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      className="ml-3 text-gray-400 hover:text-red-500 flex-shrink-0"
+                      aria-label={`Remove ${file.name}`}
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {fileError && <p role="alert" className="mt-1 text-xs text-red-600">{fileError}</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Terms + submit */}
+      <div className="space-y-4">
         <label className="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" aria-required="true" {...register("acceptTerms")} className="mt-0.5 accent-[#006400]" />
           <span className="text-sm text-gray-600">
@@ -283,13 +306,14 @@ export default function ContactForm() {
           </span>
         </label>
         {errors.acceptTerms && <p role="alert" className="mt-1 text-xs text-red-600">{errors.acceptTerms.message}</p>}
+
+        {serverError && <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{serverError}</p>}
+
+        <button type="submit" disabled={isSubmitting} className="w-full bg-[#006400] hover:bg-[#303a4d] disabled:opacity-60 text-white font-bold py-3.5 rounded-[30px] transition-colors text-sm">
+          {isSubmitting ? "Sending…" : "Send enquiry"}
+        </button>
       </div>
 
-      {serverError && <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">{serverError}</p>}
-
-      <button type="submit" disabled={isSubmitting} className="w-full bg-[#303a4d] hover:bg-[#006400] disabled:opacity-60 text-white font-bold py-3.5 rounded-[30px] transition-colors text-sm">
-        {isSubmitting ? "Sending…" : "Send enquiry"}
-      </button>
     </form>
   );
 }

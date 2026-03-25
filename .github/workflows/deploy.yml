@@ -23,7 +23,7 @@ jobs:
 
       - run: npm run build
         env:
-          PUBLIC_WEB3FORMS_KEY: ${{ secrets.PUBLIC_WEB3FORMS_KEY }}
+          PUBLIC_WORKER_URL: ${{ secrets.PUBLIC_WORKER_URL }}
 
       - uses: peaceiris/actions-gh-pages@v4
         with:
