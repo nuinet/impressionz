@@ -1,0 +1,213 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="ImpressioNZ Outdoors — Garden Creation & Maintenance Auckland"
+  description="Auckland's trusted garden creation and maintenance service. Over 10 years experience, 100+ satisfied clients. Talk directly to Rod — no middlemen."
+>
+  <!-- Hero -->
+  <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0">
+      <img
+        src="/images/propuesta_portada-2.jpg"
+        alt="Beautifully landscaped Auckland garden"
+        class="w-full h-full object-cover"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <div class="absolute inset-0 bg-black/50"></div>
+    </div>
+    <div class="relative z-10 max-w-3xl mx-auto px-4 text-center text-white">
+      <h1 class="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">
+        Garden creation and Maintenance in Auckland
+      </h1>
+      <p class="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+        Transforming your outdoor spaces into beautiful, functional gardens for over 10 years. 100+ satisfied clients. Quick response and proven results.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/contact"
+          class="bg-[#90ee90] text-[#303a4d] hover:bg-white font-bold px-8 py-3.5 rounded-[30px] transition-colors"
+        >
+          Get a free assessment
+        </a>
+        <a
+          href="/services"
+          class="bg-white text-[#303a4d] hover:bg-[#90ee90] font-bold px-8 py-3.5 rounded-[30px] transition-colors"
+        >
+          View services
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust bar -->
+  <section class="bg-[#f4f6f0] border-y border-gray-200">
+    <div class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      {[
+        { stat: "10+", label: "Years experience" },
+        { stat: "100+", label: "Satisfied clients" },
+        { stat: "8", label: "Services offered" },
+        { stat: "1", label: "Person. Always Rod." },
+      ].map(({ stat, label }) => (
+        <div>
+          <div class="font-serif text-3xl font-bold text-[#006400]">{stat}</div>
+          <div class="text-sm text-gray-600 mt-1">{label}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="py-20">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div data-animate="fade-left">
+        <img
+          src="/images/Landscaping.jpg"
+          alt="Rod working on a garden transformation in Auckland"
+          class="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
+          loading="lazy"
+        />
+      </div>
+      <div data-animate="fade-right">
+        <h2 class="font-serif text-3xl md:text-4xl font-bold mb-6 leading-tight">
+          About ImpressioNZ Gardening
+        </h2>
+        <div class="space-y-4 text-gray-600 leading-relaxed">
+          <p>
+            If your outdoor space is getting out of hand—whether maintenance is overwhelming or it's overdue for a big cleanup—we work with you to make things right. We specialize in transforming neglected spaces into gardens that increase property value and create places you'll love to spend time.
+          </p>
+          <p>
+            Our expertise covers plant choice, maintenance, and planting—grass, hedges, or gardens. We can work with what you have, introduce new elements, and clear all forms of organic waste. We focus on clarity, document our work, and set expectations clearly before starting. Every client gets the price promised—no surprise charges.
+          </p>
+        </div>
+        <a
+          href="/contact"
+          class="inline-block mt-8 bg-[#90ee90] text-[#303a4d] hover:bg-[#006400] hover:text-white font-bold px-6 py-3 rounded-[30px] transition-colors"
+        >
+          Request a free assessment
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services overview -->
+  <section class="py-12 md:py-20 bg-[#f4f6f0]">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="font-serif text-3xl md:text-4xl font-bold">What You Get</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          {
+            image: "/images/path.jpg",
+            alt: "Garden path and assessment",
+            title: "Professional Assessment",
+            body: "We personally evaluate your space and recommend specific plants that will thrive in your environment.",
+            delay: "0",
+          },
+          {
+            image: "/images/planting.jpg",
+            alt: "Planting and garden transformation",
+            title: "Complete Transformation",
+            body: "From initial cleanup to replanting with carefully selected species, we handle every step for a total garden makeover.",
+            delay: "100",
+          },
+          {
+            image: "/images/stairs.jpg",
+            alt: "Ongoing garden maintenance",
+            title: "Ongoing Maintenance",
+            body: "Optional regular service keeps your investment looking perfect year-round. We also handle all garden debris—so you don't lift a finger.",
+            delay: "200",
+          },
+        ].map(({ image, alt, title, body, delay }) => (
+          <article
+            data-animate="fade-up"
+            data-animate-delay={delay}
+            class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div class="aspect-[16/9] overflow-hidden">
+              <img src={image} alt={alt} class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+            </div>
+            <div class="p-4 sm:p-6">
+              <h3 class="font-serif text-xl font-bold mb-2">{title}</h3>
+              <p class="text-gray-600 text-sm leading-relaxed">{body}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div class="text-center mt-10">
+        <a href="/services" class="inline-block bg-[#303a4d] text-white hover:bg-[#006400] font-bold px-6 py-3 rounded-[30px] transition-colors">
+          See all services
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial / Rod's pitch -->
+  <section class="py-20 overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
+      <div class="lg:col-span-2 flex justify-center" data-animate="fade-left">
+        <img
+          src="/images/profile.jpg"
+          alt="Rod MacKenzie — ImpressioNZ Outdoors"
+          class="w-56 h-56 rounded-full object-cover shadow-lg ring-4 ring-[#90ee90]"
+          loading="lazy"
+        />
+      </div>
+      <div class="lg:col-span-3" data-animate="fade-right">
+        <svg class="w-10 h-10 text-[#90ee90] mb-4" fill="currentColor" viewBox="0 0 32 32">
+          <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm14 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
+        </svg>
+        <blockquote class="font-serif text-xl md:text-2xl leading-relaxed text-gray-800 mb-6">
+          "Rod operates as a sole trader, so you deal directly with the person doing the work—no middlemen, no confusion. Save 20+ hours of backbreaking work, avoid costly plant selection mistakes, and enjoy a garden that truly enhances your property."
+        </blockquote>
+        <div>
+          <p class="font-semibold text-[#006400]">Rod</p>
+          <p class="text-sm text-gray-500">Owner & Operator</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="relative py-24 overflow-hidden">
+    <div class="absolute inset-0">
+      <img
+        src="/images/piscina.jpg"
+        alt="Beautiful Auckland garden"
+        class="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div class="absolute inset-0 bg-[#006400]/80"></div>
+    </div>
+    <div class="relative z-10 max-w-2xl mx-auto px-4 text-center text-white">
+      <h2 class="font-serif text-3xl md:text-4xl font-bold mb-8">
+        Ready for a Garden Transformation?
+      </h2>
+      <a
+        href="/contact"
+        class="inline-block bg-[#90ee90] text-[#303a4d] hover:bg-white font-bold px-8 py-4 rounded-[30px] transition-colors text-lg"
+      >
+        Contact us today
+      </a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
+
+  document.querySelectorAll("[data-animate]").forEach((el) => observer.observe(el));
+</script>

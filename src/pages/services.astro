@@ -1,0 +1,167 @@
+---
+import Layout from "../layouts/Layout.astro";
+import BeforeAfterSlider from "../components/BeforeAfterSlider.astro";
+
+const services = [
+  {
+    id: "planting",
+    title: "Planting",
+    description:
+      "Good planting starts with knowing what will actually survive and thrive in your specific conditions — soil type, drainage, sun exposure, and how much maintenance you want to do later. Rod selects species that suit your environment rather than just what looks nice in a pot. That means healthier plants, less replacement cost, and a garden that fills in properly over time rather than thinning out after the first summer.",
+    detail: "Includes: species selection and advice, supply of plants (or planting client-supplied stock), bed preparation, mulching, initial watering setup.",
+  },
+  {
+    id: "lawncare",
+    title: "Lawncare and lawn creation",
+    description:
+      "A good lawn is low-maintenance when it's set up right. Rod handles everything from seeding or laying new turf on bare ground through to repairing patchy, worn, or weed-dominated existing lawns. Soil preparation is done properly before anything goes down — skipping this step is why cheap lawn jobs fail within a season.",
+    detail: "Includes: soil preparation and levelling, turf supply and laying or seed sowing, edge establishment, ongoing mowing and fertilising schedules.",
+  },
+  {
+    id: "landscaping",
+    title: "Landscaping",
+    description:
+      "Landscaping at ImpressioNZ means practical outdoor spaces that look good and hold up over time — not Instagram gardens that need constant attention. Rod works on paths, terracing, garden bed edging, retaining walls, and the structural elements that frame planting. Everything is quoted in writing before work starts, scoped to what you actually need.",
+    detail: "Includes: site assessment and planning, earthworks and levelling, path and paving installation, retaining and edging work, garden bed creation.",
+  },
+  {
+    id: "stump-grinding",
+    title: "Stump Grinding",
+    description:
+      "Stumps left after tree removal are a hazard, an eyesore, and a source of ongoing pest problems. Grinding removes the stump below ground level so the area can be replanted or paved over. Note: stump removal is quoted separately from tree removal — if you want the stump gone, say so at the time of quoting so it's included in the written scope.",
+    detail: "Includes: grinding to below grade, removal of debris and grindings, optional backfilling with topsoil ready for replanting.",
+  },
+  {
+    id: "tree-removal",
+    title: "Tree removal and pruning",
+    description:
+      "Overgrown, dead, or poorly positioned trees cause real problems — blocked light, damage to fences, lifted paths, and risk in a storm. Rod handles removal and pruning for trees at residential scale, including cleanup and disposal of all material. Root removal must be specified separately and quoted accordingly — it significantly increases the scope of work.",
+    detail: "Includes: safe felling or selective pruning, branch and debris removal, stump grinding (quoted separately), advice on replacement planting.",
+  },
+  {
+    id: "hedge-trimming",
+    title: "Hedge Trimming and Hedge Reduction",
+    description:
+      "Overgrown hedges quickly become a boundary dispute and a maintenance headache. Regular trimming keeps them dense, healthy, and at the right size — letting them get too large before cutting back causes die-back and a patchy result. If your hedge is already oversized, reduction work brings it back to a manageable height. One thing to flag: if you need clean lines on a hedge that's visible from above (balcony, raised deck), let Rod know at the time of quoting — it adds to the work.",
+    detail: "Includes: trimming, shaping and reduction, removal of all cuttings and green waste from site.",
+  },
+  {
+    id: "garden-maintenance",
+    title: "Garden Maintenance and Consulting",
+    description:
+      "A one-off garden makeover loses value fast without some follow-through. Rod offers regular maintenance visits — seasonal pruning, weeding, mulching, plant health checks — to keep the garden in good shape between your own efforts. For clients who want more control, consulting sessions cover what to do, when, and how, so you can handle routine care yourself with confidence.",
+    detail: "Includes: scheduled maintenance visits (frequency agreed), weeding and mulching, seasonal pruning, plant health advice, optional consulting sessions.",
+  },
+  {
+    id: "waste-removal",
+    title: "Waste and Fence removal",
+    description:
+      "Green waste, old fencing, overgrown hedgerow offcuts — it builds up fast and disposal isn't straightforward. Rod removes organic garden waste and old timber fencing as part of a wider job or as a standalone clearance. Important: waste removal is quoted based on what is visible at the time. Additional waste that appears during the job (hidden beneath growth, behind structures) is not included in the original quote — a variation will be raised.",
+    detail: "Includes: removal of green waste and garden debris, old timber fence removal, load and disposal. Green waste only — no treated timber, concrete, or household waste.",
+  },
+];
+---
+
+<Layout
+  title="Services — ImpressioNZ Outdoors Auckland"
+  description="Auckland gardening and landscaping services: planting, lawn care, tree removal, hedge trimming, landscaping, stump grinding, garden maintenance and waste removal."
+>
+  <!-- Page header -->
+  <section class="bg-[--color-surface] border-b border-gray-200 py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <p class="text-[--color-brand-dark] font-medium uppercase tracking-wide text-sm mb-3">What we offer</p>
+      <h1 class="font-serif text-4xl md:text-5xl font-bold mb-4">Expert outdoor services in Auckland</h1>
+      <p class="text-gray-600 max-w-2xl text-lg leading-relaxed">
+        We increase and retain the value of your property by creating and maintaining outdoor spaces
+        you actually want to spend time in. All work is quoted in writing before it starts.
+      </p>
+    </div>
+  </section>
+
+  <!-- Before / After -->
+  <section class="py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-10">
+        <h2 class="font-serif text-3xl font-bold mb-2">Before & after</h2>
+        <p class="text-gray-500">Drag the slider to compare</p>
+      </div>
+      <BeforeAfterSlider
+        beforeSrc="/images/Antes 1.jpg"
+        afterSrc="/images/Después 1.jpg"
+        beforeAlt="Garden before transformation"
+        afterAlt="Garden after transformation by ImpressioNZ"
+      />
+    </div>
+  </section>
+
+  <!-- Services list -->
+  <section class="py-16 bg-[--color-surface]">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="font-serif text-3xl font-bold mb-10">All services</h2>
+      <div class="space-y-4" id="services-accordion">
+        {services.map((service, i) => (
+          <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
+            <button
+              class="w-full text-left px-6 py-5 flex items-center justify-between gap-4 hover:bg-[--color-surface] transition-colors"
+              aria-expanded="false"
+              aria-controls={`service-${service.id}`}
+              data-accordion-btn
+            >
+              <span class="font-serif text-lg font-bold">{service.title}</span>
+              <svg class="w-5 h-5 text-[--color-brand-dark] shrink-0 transition-transform" data-accordion-icon fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div id={`service-${service.id}`} class="hidden px-6 pb-6" data-accordion-content>
+              <p class="text-gray-700 leading-relaxed mb-4">{service.description}</p>
+              <p class="text-sm text-[--color-brand-muted] bg-[--color-surface] rounded p-3 leading-relaxed">
+                {service.detail}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+      <h2 class="font-serif text-3xl font-bold mb-4">Not sure what you need?</h2>
+      <p class="text-gray-600 mb-8 text-lg">
+        Rod visits your property, assesses the space, and tells you exactly what's needed — and what isn't.
+        The assessment is free and there's no obligation to proceed.
+      </p>
+      <a
+        href="/contact"
+        class="inline-block bg-[#90ee90] text-[#303a4d] hover:bg-[#006400] hover:text-white font-bold px-8 py-4 rounded-[30px] transition-colors"
+      >
+        Book a free assessment
+      </a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  document.querySelectorAll("[data-accordion-btn]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const isOpen = btn.getAttribute("aria-expanded") === "true";
+      const content = btn.nextElementSibling as HTMLElement;
+      const icon = btn.querySelector("[data-accordion-icon]") as SVGElement;
+
+      // Close all
+      document.querySelectorAll("[data-accordion-btn]").forEach((b) => {
+        b.setAttribute("aria-expanded", "false");
+        (b.nextElementSibling as HTMLElement).classList.add("hidden");
+        (b.querySelector("[data-accordion-icon]") as SVGElement).style.transform = "";
+      });
+
+      // Open clicked (unless it was already open)
+      if (!isOpen) {
+        btn.setAttribute("aria-expanded", "true");
+        content.classList.remove("hidden");
+        icon.style.transform = "rotate(180deg)";
+      }
+    });
+  });
+</script>

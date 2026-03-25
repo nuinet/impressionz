@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(cp \"C:/Users/Jack/repos/Rod/site-backup/images/\"* \"C:/Users/Jack/repos/Rod/public/images/\")",
+      "Bash(cp \"C:/Users/Jack/repos/Rod/site-backup/typo/\"* \"C:/Users/Jack/repos/Rod/public/fonts/\")",
+      "Bash(npm run:*)",
+      "Bash(npx astro:*)"
+    ]
+  }
+}

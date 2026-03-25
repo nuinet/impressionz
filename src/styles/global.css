@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-dark: #006400;
+  --color-brand-mid: #2d6a4f;
+  --color-brand-light: #90ee90;
+  --color-brand-muted: #606d45;
+  --color-ink: #303a4d;
+  --color-surface: #f4f6f0;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Merriweather", ui-serif, Georgia, serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color: var(--color-ink);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  /* Initial hidden states for scroll animations */
+  [data-animate] {
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  [data-animate="fade-up"] {
+    transform: translateY(2rem);
+  }
+
+  [data-animate="fade-left"] {
+    transform: translateX(-2.5rem);
+  }
+
+  [data-animate="fade-right"] {
+    transform: translateX(2.5rem);
+  }
+
+  /* Delay variants */
+  [data-animate-delay="100"] { transition-delay: 100ms; }
+  [data-animate-delay="200"] { transition-delay: 200ms; }
+  [data-animate-delay="300"] { transition-delay: 300ms; }
+
+  /* Visible state — added by IntersectionObserver */
+  [data-animate].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}

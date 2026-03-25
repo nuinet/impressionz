@@ -1,0 +1,71 @@
+---
+interface Props {
+  beforeSrc: string;
+  afterSrc: string;
+  beforeAlt: string;
+  afterAlt: string;
+}
+
+const { beforeSrc, afterSrc, beforeAlt, afterAlt } = Astro.props;
+---
+
+<div
+  class="relative select-none overflow-hidden rounded-lg shadow-lg max-w-3xl mx-auto aspect-[16/9] cursor-col-resize"
+  id="ba-slider"
+  role="img"
+  aria-label="Before and after comparison slider"
+>
+  <!-- After image (full width, base layer) -->
+  <img
+    id="ba-after"
+    src={afterSrc}
+    alt={afterAlt}
+    class="absolute inset-0 w-full h-full object-cover"
+    draggable="false"
+  />
+
+  <!-- Before image (full width, clipped via clip-path) -->
+  <img
+    id="ba-before"
+    src={beforeSrc}
+    alt={beforeAlt}
+    class="absolute inset-0 w-full h-full object-cover"
+    style="clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%)"
+    draggable="false"
+  />
+
+  <!-- Divider line + handle -->
+  <div id="ba-divider" class="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg pointer-events-none" style="left: 50%">
+    <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
+      <svg class="w-5 h-5 text-[#006400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l-3 3 3 3M16 9l3 3-3 3"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Labels -->
+  <span class="absolute top-4 left-4 bg-black/60 text-white text-xs font-semibold px-2 py-1 rounded pointer-events-none">Before</span>
+  <span class="absolute top-4 right-4 bg-black/60 text-white text-xs font-semibold px-2 py-1 rounded pointer-events-none">After</span>
+</div>
+
+<script>
+  const slider = document.getElementById("ba-slider")!;
+  const before = document.getElementById("ba-before")!;
+  const divider = document.getElementById("ba-divider")!;
+  let dragging = false;
+
+  function setPosition(clientX: number) {
+    const rect = slider.getBoundingClientRect();
+    const pct = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1) * 100;
+    before.style.clipPath = `polygon(0 0, ${pct}% 0, ${pct}% 100%, 0 100%)`;
+    divider.style.left = `${pct}%`;
+  }
+
+  slider.addEventListener("mousedown", (e) => { dragging = true; setPosition(e.clientX); });
+  window.addEventListener("mouseup", () => { dragging = false; });
+  window.addEventListener("mousemove", (e) => { if (dragging) setPosition(e.clientX); });
+
+  slider.addEventListener("touchstart", (e) => { dragging = true; setPosition(e.touches[0]!.clientX); }, { passive: true });
+  window.addEventListener("touchend", () => { dragging = false; });
+  window.addEventListener("touchmove", (e) => { if (dragging) setPosition(e.touches[0]!.clientX); }, { passive: true });
+</script>
