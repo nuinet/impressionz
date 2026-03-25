@@ -1,7 +1,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useState, useRef } from "react";
+
+const MAX_FILES = 5;
+const MAX_SIZE_MB = 5;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 
 const schema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -72,33 +76,70 @@ function RadioGroup({
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
+  const handleFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+    const next = [...files];
+    const errs: string[] = [];
+
+    for (const file of Array.from(incoming)) {
+      if (next.length >= MAX_FILES) {
+        errs.push(`Maximum ${MAX_FILES} photos allowed`);
+        break;
+      }
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        errs.push(`${file.name}: only JPEG, PNG, WebP, or HEIC photos are accepted`);
+        continue;
+      }
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        errs.push(`${file.name}: must be under ${MAX_SIZE_MB} MB`);
+        continue;
+      }
+      next.push(file);
+    }
+
+    setFileError(errs[0] ?? "");
+    setFiles(next);
+    // Reset the input so the same file can be re-added after removal
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setFileError("");
+  };
+
   const onSubmit = async (data: FormValues) => {
     setServerError("");
+
+    const body = new FormData();
+    body.append("access_key", import.meta.env.PUBLIC_WEB3FORMS_KEY);
+    body.append("subject", `New enquiry from ${data.name} — ${data.suburb}`);
+    body.append("from_name", "ImpressioNZ Outdoors Website");
+    body.append("replyto", data.email);
+    body.append("Name", data.name);
+    body.append("Email", data.email);
+    body.append("Phone", data.phone || "Not provided");
+    body.append("Suburb / Address", data.suburb);
+    body.append("Property owner?", data.propertyOwner === "yes" ? "Yes" : "No");
+    body.append("Waste removal needed?", data.wasteRemoval === "yes" ? "Yes" : "No");
+    body.append("Plants purchasing needed?", data.plantsPurchasing === "yes" ? "Yes" : "No");
+    body.append("How soon to proceed?", hiringLabels[data.hiringDecision]);
+    body.append("Additional details", data.additionalDetails || "—");
+
+    files.forEach((file) => body.append("attachment[]", file));
+
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          access_key: import.meta.env.PUBLIC_WEB3FORMS_KEY,
-          subject: `New enquiry from ${data.name} — ${data.suburb}`,
-          from_name: "ImpressioNZ Outdoors Website",
-          replyto: data.email,
-          // Form fields formatted for the email
-          Name: data.name,
-          Email: data.email,
-          Phone: data.phone || "Not provided",
-          "Suburb / Address": data.suburb,
-          "Property owner?": data.propertyOwner === "yes" ? "Yes" : "No",
-          "Waste removal needed?": data.wasteRemoval === "yes" ? "Yes" : "No",
-          "Plants purchasing needed?": data.plantsPurchasing === "yes" ? "Yes" : "No",
-          "How soon to proceed?": hiringLabels[data.hiringDecision],
-          "Additional details": data.additionalDetails || "—",
-        }),
+        body,
       });
 
       const json = await res.json();
@@ -176,10 +217,60 @@ export default function ContactForm() {
       <div>
         <label htmlFor="additionalDetails" className={labelCls}>
           Additional details or specific requirements
-          <span className="text-gray-400 font-normal"> (photos can be sent after we reply)</span>
         </label>
         <textarea id="additionalDetails" rows={4} {...register("additionalDetails")} placeholder="Access notes, specific requirements, any questions for Rod" className={`${inputCls} resize-y`} />
         {errors.additionalDetails && <p role="alert" className="mt-1 text-xs text-red-600">{errors.additionalDetails.message}</p>}
+      </div>
+
+      <div>
+        <label className={labelCls}>
+          Photos <span className="text-gray-400 font-normal">(optional — up to {MAX_FILES}, {MAX_SIZE_MB} MB each)</span>
+        </label>
+        <div
+          className="border border-dashed border-gray-300 rounded px-4 py-6 text-center cursor-pointer hover:border-[#006400] transition-colors"
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
+          role="button"
+          tabIndex={0}
+          aria-label="Upload photos"
+          onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+        >
+          <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+          <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
+          <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP, HEIC</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+            multiple
+            className="sr-only"
+            onChange={(e) => handleFiles(e.target.files)}
+            aria-hidden="true"
+          />
+        </div>
+
+        {files.length > 0 && (
+          <ul className="mt-2 space-y-1">
+            {files.map((file, i) => (
+              <li key={i} className="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-1.5">
+                <span className="truncate text-gray-700">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeFile(i)}
+                  className="ml-3 text-gray-400 hover:text-red-500 flex-shrink-0"
+                  aria-label={`Remove ${file.name}`}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {fileError && <p role="alert" className="mt-1 text-xs text-red-600">{fileError}</p>}
       </div>
 
       <div>
