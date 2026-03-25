@@ -3,6 +3,11 @@ import Layout from "../layouts/Layout.astro";
 import { Image } from "astro:assets";
 import HeroImg from "../assets/images/propuesta_portada-2.jpg";
 import LandscapingImg from "../assets/images/Landscaping.jpg";
+import PathImg from "../assets/images/path.jpg";
+import PlantingImg from "../assets/images/planting.jpg";
+import StairsImg from "../assets/images/stairs.jpg";
+import PiscinaImg from "../assets/images/piscina.jpg";
+import ProfileImg from "../assets/images/profile.jpg";
 ---
 
 <Layout
@@ -107,36 +112,43 @@ import LandscapingImg from "../assets/images/Landscaping.jpg";
         <h2 class="font-serif text-3xl md:text-4xl font-bold">What You Get</h2>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
+        {([
           {
-            image: "/images/path.jpg",
+            image: PathImg,
             alt: "Garden path and assessment",
             title: "Professional Assessment",
             body: "We personally evaluate your space and recommend specific plants that will thrive in your environment.",
             delay: "0",
           },
           {
-            image: "/images/planting.jpg",
+            image: PlantingImg,
             alt: "Planting and garden transformation",
             title: "Complete Transformation",
             body: "From initial cleanup to replanting with carefully selected species, we handle every step for a total garden makeover.",
             delay: "100",
           },
           {
-            image: "/images/stairs.jpg",
+            image: StairsImg,
             alt: "Ongoing garden maintenance",
             title: "Ongoing Maintenance",
             body: "Optional regular service keeps your investment looking perfect year-round. We also handle all garden debris—so you don't lift a finger.",
             delay: "200",
           },
-        ].map(({ image, alt, title, body, delay }) => (
+        ] as const).map(({ image, alt, title, body, delay }) => (
           <article
             data-animate="fade-up"
             data-animate-delay={delay}
             class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
           >
             <div class="aspect-[16/9] overflow-hidden">
-              <img src={image} alt={alt} class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+              <Image
+                src={image}
+                alt={alt}
+                class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+                widths={[400, 800]}
+                sizes="(min-width: 768px) 33vw, 100vw"
+              />
             </div>
             <div class="p-4 sm:p-6">
               <h3 class="font-serif text-xl font-bold mb-2">{title}</h3>
@@ -194,11 +206,13 @@ import LandscapingImg from "../assets/images/Landscaping.jpg";
   <section class="py-20 bg-[#f4f6f0] overflow-hidden">
     <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
       <div class="lg:col-span-2 flex justify-center" data-animate="fade-left">
-        <img
-          src="/images/profile.jpg"
+        <Image
+          src={ProfileImg}
           alt="Rod MacKenzie — ImpressioNZ Outdoors"
           class="w-56 h-56 rounded-full object-cover shadow-lg ring-4 ring-[#90ee90]"
           loading="lazy"
+          width={224}
+          height={224}
         />
       </div>
       <div class="lg:col-span-3" data-animate="fade-right">
@@ -219,11 +233,13 @@ import LandscapingImg from "../assets/images/Landscaping.jpg";
   <!-- CTA -->
   <section class="relative py-24 overflow-hidden">
     <div class="absolute inset-0">
-      <img
-        src="/images/piscina.jpg"
+      <Image
+        src={PiscinaImg}
         alt="Beautiful Auckland garden"
         class="w-full h-full object-cover"
         loading="lazy"
+        widths={[800, 1200, 1920]}
+        sizes="100vw"
       />
       <div class="absolute inset-0 bg-[#006400]/80"></div>
     </div>
