@@ -1,0 +1,109 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getPosts } from "../../lib/substack";
+import type { SubstackPost } from "../../lib/substack";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: SubstackPost;
+}
+
+const { post } = Astro.props;
+
+const fmtDate = (iso: string) => {
+  try {
+    return new Intl.DateTimeFormat("en-NZ", { year: "numeric", month: "long", day: "numeric" }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://impressionz.co.nz/" },
+    { "@type": "ListItem", position: 2, name: "Blog", item: "https://impressionz.co.nz/blog/" },
+    { "@type": "ListItem", position: 3, name: post.title, item: `https://impressionz.co.nz/blog/${post.slug}/` },
+  ],
+};
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.title,
+  datePublished: post.date,
+  author: { "@type": "Person", name: "Rod MacKenzie" },
+  publisher: { "@type": "Organization", name: "ImpressioNZ Outdoors", url: "https://impressionz.co.nz" },
+  url: `https://impressionz.co.nz/blog/${post.slug}/`,
+  ...(post.thumbnail ? { image: post.thumbnail } : {}),
+};
+---
+
+<style>
+  .substack-content :global(h1),
+  .substack-content :global(h2),
+  .substack-content :global(h3),
+  .substack-content :global(h4) {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    color: #111827;
+    margin: 1.5em 0 0.5em;
+    line-height: 1.3;
+  }
+  .substack-content :global(h2) { font-size: 1.5rem; }
+  .substack-content :global(h3) { font-size: 1.25rem; }
+  .substack-content :global(p) { margin: 1em 0; line-height: 1.75; color: #374151; }
+  .substack-content :global(a) { color: #006400; text-decoration: underline; }
+  .substack-content :global(a:hover) { color: #004d00; }
+  .substack-content :global(img) { max-width: 100%; border-radius: 0.5rem; margin: 1.5em auto; display: block; }
+  .substack-content :global(ul),
+  .substack-content :global(ol) { margin: 1em 0 1em 1.5rem; }
+  .substack-content :global(li) { margin: 0.4em 0; line-height: 1.7; color: #374151; }
+  .substack-content :global(blockquote) { border-left: 3px solid #006400; padding-left: 1rem; margin: 1.5em 0; color: #6b7280; font-style: italic; }
+  .substack-content :global(hr) { border-color: #e5e7eb; margin: 2em 0; }
+  .substack-content :global(pre) { background: #f3f4f6; padding: 1rem; border-radius: 0.375rem; overflow-x: auto; }
+  .substack-content :global(code) { background: #f3f4f6; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875em; }
+</style>
+
+<Layout
+  title={`${post.title} — ImpressioNZ Outdoors`}
+  description={post.description}
+  ogImage={post.thumbnail ?? undefined}
+  schema={[breadcrumbSchema, articleSchema]}
+>
+  <article class="py-16 px-4 max-w-3xl mx-auto">
+    <nav class="text-sm text-gray-400 mb-8">
+      <a href="/" class="hover:text-[#006400]">Home</a>
+      <span class="mx-2">›</span>
+      <a href="/blog/" class="hover:text-[#006400]">Blog</a>
+      <span class="mx-2">›</span>
+      <span class="text-gray-600">{post.title}</span>
+    </nav>
+
+    {post.thumbnail && (
+      <img
+        src={post.thumbnail}
+        alt=""
+        class="w-full max-h-80 object-cover rounded-lg mb-8"
+      />
+    )}
+
+    <h1 class="font-serif text-4xl font-bold text-gray-900 mb-3">{post.title}</h1>
+    {post.date && <p class="text-sm text-gray-400 mb-10">{fmtDate(post.date)}</p>}
+
+    <div class="substack-content" set:html={post.content} />
+
+    <div class="mt-12 pt-8 border-t border-gray-200 flex items-center justify-between">
+      <a href="/blog/" class="text-sm text-[#006400] hover:underline">← Back to blog</a>
+      <a href={post.link} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-[#006400]">View on Substack ↗</a>
+    </div>
+  </article>
+</Layout>

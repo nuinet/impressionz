@@ -9,7 +9,9 @@
       "Bash(npm run:*)",
       "Bash(npx astro:*)",
       "Bash(cd:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(npm list:*)",
+      "Bash(curl -s \"https://mackenzier.substack.com/feed\")"
     ]
   }
 }

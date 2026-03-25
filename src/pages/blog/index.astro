@@ -1,0 +1,58 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getPosts } from "../../lib/substack";
+
+const posts = await getPosts();
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://impressionz.co.nz/" },
+    { "@type": "ListItem", position: 2, name: "Blog", item: "https://impressionz.co.nz/blog/" },
+  ],
+};
+
+const fmtDate = (iso: string) => {
+  try {
+    return new Intl.DateTimeFormat("en-NZ", { year: "numeric", month: "long", day: "numeric" }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+};
+---
+
+<Layout
+  title="Blog — ImpressioNZ Outdoors"
+  description="Garden tips, project updates, and outdoor inspiration from Rod MacKenzie."
+  schema={breadcrumbSchema}
+>
+  <section class="py-16 px-4 max-w-4xl mx-auto">
+    <h1 class="font-serif text-4xl font-bold text-[#006400] mb-2">Blog</h1>
+    <p class="text-gray-600 mb-10">Garden tips, project updates, and outdoor inspiration from Rod.</p>
+
+    {posts.length === 0 && (
+      <p class="text-gray-500">No posts yet — check back soon.</p>
+    )}
+
+    <div class="space-y-8">
+      {posts.map((post) => (
+        <a href={`/blog/${post.slug}/`} class="group flex gap-6 items-start border border-gray-200 rounded-lg p-5 hover:border-[#006400] transition-colors">
+          {post.thumbnail && (
+            <img
+              src={post.thumbnail}
+              alt=""
+              class="w-28 h-28 object-cover rounded flex-shrink-0"
+              loading="lazy"
+            />
+          )}
+          <div class="min-w-0">
+            <h2 class="font-serif text-xl font-bold text-gray-900 group-hover:text-[#006400] transition-colors mb-1">{post.title}</h2>
+            {post.date && <p class="text-xs text-gray-400 mb-2">{fmtDate(post.date)}</p>}
+            <p class="text-sm text-gray-600 line-clamp-3">{post.description}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</Layout>
