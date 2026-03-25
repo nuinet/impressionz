@@ -13,7 +13,11 @@
       "Bash(npm list:*)",
       "Bash(curl -s \"https://mackenzier.substack.com/feed\")",
       "Bash(grep -oP '\\(?<=video\\)[^<]{0,300}')",
-      "Bash(grep -o 'simple-joy.\\\\{0,3000\\\\}')"
+      "Bash(grep -o 'simple-joy.\\\\{0,3000\\\\}')",
+      "Bash(ls /c/Users/Jack/repos/Rod/node_modules/@fontsource/merriweather/*.css)",
+      "Bash(ls /c/Users/Jack/repos/Rod/node_modules/@fontsource/inter/latin*.css)",
+      "Bash(ls /c/Users/Jack/repos/Rod/dist/_astro/*.woff2)",
+      "Bash(wc -c /c/Users/Jack/repos/Rod/dist/_astro/*.woff2)"
     ]
   }
 }

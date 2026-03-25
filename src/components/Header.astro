@@ -76,7 +76,7 @@ const currentPath = Astro.url.pathname;
 
     <!-- Center: logo -->
     <a href="/" aria-label="ImpressioNZ Outdoors — Home">
-      <Image src={Logo} alt="ImpressioNZ Outdoors" height={40} loading="eager" class="h-10 w-auto" />
+      <Image src={Logo} alt="ImpressioNZ Outdoors" height={40} loading="eager" class="h-10 w-auto" densities={[1, 2, 3]} />
     </a>
 
     <!-- Right: nav on desktop | tap-to-call on mobile -->
