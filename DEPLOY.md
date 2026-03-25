@@ -6,80 +6,77 @@
 npm run build
 ```
 
-Produces two folders:
+Produces a single `dist/` folder of static HTML, CSS, JS, and images — upload it directly to the server's `httpdocs/`.
 
-| Folder | Contents |
+No Node server required. The contact form posts to [Web3Forms](https://web3forms.com) (a free third-party service) — no backend needed.
+
+---
+
+## Environment variables
+
+### Local development
+
+Copy `.env.example` to `.env` and fill in your values:
+
+```
+PUBLIC_WEB3FORMS_KEY=your-access-key-here
+```
+
+### GitHub Secrets (for CI/CD)
+
+Add these in **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
 |---|---|
-| `dist/client/` | All static HTML, CSS, JS, images — served directly |
-| `dist/server/` | Minimal Node.js server — handles `/api/enquiry` (contact form) and Sanity Studio |
+| `PUBLIC_WEB3FORMS_KEY` | Web3Forms access key (get from web3forms.com) |
+| `FTP_HOST` | Plesk FTP hostname (e.g. `ftp.impressionz.co.nz`) |
+| `FTP_USERNAME` | FTP username |
+| `FTP_PASSWORD` | FTP password |
 
-The Node server also serves the static files, so running it handles everything.
+---
+
+## Getting a Web3Forms key
+
+1. Go to [web3forms.com](https://web3forms.com)
+2. Enter Rod's email address
+3. Check the email — click the confirmation link
+4. Copy the access key shown
+5. Add it to `.env` locally, and to the `PUBLIC_WEB3FORMS_KEY` GitHub Secret
+
+Emails from the contact form will go to Rod's inbox. The key is safe to expose in the browser (it's designed for static sites).
 
 ---
 
 ## First-time Plesk setup
 
-### 1. Environment variables
+Plesk serves `httpdocs/` as static files — no Node.js configuration needed.
 
-Create `.env` in the project root on the server (never commit this):
-
-```
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxx
-```
-
-Sanity keys will be added here when Sanity is set up.
-
-### 2. Enable Node.js in Plesk
-
-1. Go to your domain in Plesk → **Node.js**
-2. Enable Node.js
-3. Set **Application root** to your deployment folder (e.g. `/var/www/vhosts/impressionz.co.nz/`)
-4. Set **Application startup file** to `dist/server/entry.mjs`
-5. Set environment variables: `RESEND_API_KEY`, and optionally `HOST=0.0.0.0`, `PORT=3000`
-6. Click **NPM install** to install production dependencies
-7. Click **Restart app**
-
-Plesk's Apache/Nginx will automatically reverse-proxy requests to the Node app. You do **not** need to change the document root — Plesk handles the proxy in front.
-
-### 3. Deploy files
-
-On your local machine, build and copy files to the server:
-
-```bash
-npm run build
-```
-
-Then upload the entire project (excluding `node_modules/` and `site-backup/`) to the server via FTP or SSH. The server needs:
-
-```
-dist/
-node_modules/   ← run `npm install --omit=dev` on the server, or upload from local
-package.json
-.env            ← create this manually on the server
-```
-
-### 4. Subsequent deploys
-
-```bash
-# Local
-npm run build
-
-# Upload dist/ to server via FTP/SCP, then in Plesk:
-# Node.js → Restart app
-```
+1. Set up FTP credentials in Plesk
+2. Add the four GitHub Secrets above
+3. Push to `main` — the GitHub Action builds and deploys automatically
 
 ---
 
-## Is the document root involved?
+## Subsequent deploys
 
-Not directly. When the Node.js app is running in Plesk, it handles all requests — static files from `dist/client/` and the API endpoint. Plesk proxies everything through the Node server.
+Push to `main`. The GitHub Action:
+1. Installs dependencies
+2. Builds the site
+3. FTPs only changed files to `httpdocs/`
 
-The **document root** (`httpdocs/`) is bypassed for Node.js apps in Plesk. You don't need to put files there.
+---
+
+## Sanity CMS (future)
+
+When Sanity is set up, content changes will trigger a rebuild via webhook:
+
+1. In Sanity: add a webhook pointing to the GitHub `repository_dispatch` API
+2. The workflow already handles `repository_dispatch: sanity_publish`
+3. Add `PUBLIC_SANITY_PROJECT_ID` and `PUBLIC_SANITY_DATASET` to GitHub Secrets
 
 ---
 
 ## Notes
 
-- The contact form (`/api/enquiry`) requires the Node server to be running. If the Node app is down, the form will return an error — everything else (all HTML pages) will still load from cache/static.
-- When Sanity Studio is added, it will also be served by the Node app at `/studio`.
-- `RESEND_API_KEY` must be set or the contact form silently fails — test it after every deploy.
+- The contact form requires `PUBLIC_WEB3FORMS_KEY` to be set — test it after every deploy by submitting a test enquiry
+- The sitemap is auto-generated at `sitemap-index.xml`

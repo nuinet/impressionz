@@ -1,10 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState, useRef } from "react";
-
-const MAX_FILES = 30;
-const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
+import { useState } from "react";
 
 const schema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -17,7 +14,7 @@ const schema = z.object({
   hiringDecision: z.enum(["researching", "thinking", "might_hire", "going_to_hire"], {
     error: "Please select an option",
   }),
-  additionalDetails: z.string().max(2000, "Please keep details under 2000 characters").optional(),
+  additionalDetails: z.string().max(2000).optional(),
   acceptTerms: z.literal(true).refine((v) => v === true, {
     message: "You must accept the terms to proceed",
   }),
@@ -36,6 +33,13 @@ const hiringOptions = [
   { value: "might_hire", label: "Likely to hire" },
   { value: "going_to_hire", label: "Ready to proceed" },
 ];
+
+const hiringLabels: Record<string, string> = {
+  researching: "Just researching",
+  thinking: "Thinking about it",
+  might_hire: "Likely to hire",
+  going_to_hire: "Ready to proceed",
+};
 
 function RadioGroup({
   name,
@@ -60,7 +64,7 @@ function RadioGroup({
           </label>
         ))}
       </div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }
@@ -68,51 +72,42 @@ function RadioGroup({
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
-  const [fileError, setFileError] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
-
-  const handleFiles = (incoming: FileList | null) => {
-    if (!incoming) return;
-    setFileError("");
-    const arr = Array.from(incoming);
-    const combined = [...files, ...arr];
-    if (combined.length > MAX_FILES) {
-      setFileError(`Maximum ${MAX_FILES} photos.`);
-      return;
-    }
-    const oversized = arr.find((f) => f.size > MAX_FILE_BYTES);
-    if (oversized) {
-      setFileError(`${oversized.name} exceeds the 10MB limit.`);
-      return;
-    }
-    setFiles(combined);
-  };
-
-  const removeFile = (i: number) => setFiles(files.filter((_, idx) => idx !== i));
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+  });
 
   const onSubmit = async (data: FormValues) => {
     setServerError("");
-    const fd = new FormData();
-    Object.entries(data).forEach(([k, v]) => fd.append(k, String(v)));
-    files.forEach((f) => fd.append("photos", f));
-
     try {
-      const res = await fetch("/api/enquiry", { method: "POST", body: fd });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setServerError((body as { error?: string }).error ?? "Something went wrong. Please try again or call Rod directly.");
-        return;
-      }
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key: import.meta.env.PUBLIC_WEB3FORMS_KEY,
+          subject: `New enquiry from ${data.name} — ${data.suburb}`,
+          from_name: "ImpressioNZ Outdoors Website",
+          replyto: data.email,
+          // Form fields formatted for the email
+          Name: data.name,
+          Email: data.email,
+          Phone: data.phone || "Not provided",
+          "Suburb / Address": data.suburb,
+          "Property owner?": data.propertyOwner === "yes" ? "Yes" : "No",
+          "Waste removal needed?": data.wasteRemoval === "yes" ? "Yes" : "No",
+          "Plants purchasing needed?": data.plantsPurchasing === "yes" ? "Yes" : "No",
+          "How soon to proceed?": hiringLabels[data.hiringDecision],
+          "Additional details": data.additionalDetails || "—",
+        }),
+      });
+
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || "Submission failed");
       setSubmitted(true);
-    } catch {
-      setServerError("Could not send your message. Please check your connection and try again.");
+    } catch (e) {
+      setServerError(
+        e instanceof Error ? e.message : "Something went wrong. Please try again or call Rod directly."
+      );
     }
   };
 
@@ -133,8 +128,6 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6" aria-label="Enquiry form">
-
-      {/* Name + Email */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="name" className={labelCls}>Your name <span className="text-red-500" aria-hidden="true">*</span></label>
@@ -148,7 +141,6 @@ export default function ContactForm() {
         </div>
       </div>
 
-      {/* Phone + Suburb */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="phone" className={labelCls}>Phone number</label>
@@ -161,121 +153,50 @@ export default function ContactForm() {
         </div>
       </div>
 
-      {/* Property owner */}
       <fieldset>
         <legend className={labelCls}>Are you the property owner? <span className="text-red-500" aria-hidden="true">*</span></legend>
         <RadioGroup name="propertyOwner" options={yesNo} register={register} error={errors.propertyOwner?.message} />
       </fieldset>
 
-      {/* Waste removal */}
       <fieldset>
         <legend className={labelCls}>Do you need waste removal? <span className="text-red-500" aria-hidden="true">*</span></legend>
         <RadioGroup name="wasteRemoval" options={yesNo} register={register} error={errors.wasteRemoval?.message} />
       </fieldset>
 
-      {/* Plants purchasing */}
       <fieldset>
         <legend className={labelCls}>Do you need plants purchased? <span className="text-red-500" aria-hidden="true">*</span></legend>
         <RadioGroup name="plantsPurchasing" options={yesNo} register={register} error={errors.plantsPurchasing?.message} />
       </fieldset>
 
-      {/* Hiring decision */}
       <fieldset>
         <legend className={labelCls}>How soon are you looking to proceed? <span className="text-red-500" aria-hidden="true">*</span></legend>
         <RadioGroup name="hiringDecision" options={hiringOptions} register={register} error={errors.hiringDecision?.message} />
       </fieldset>
 
-      {/* Photos */}
       <div>
-        <p className={labelCls}>Photos of the work area <span className="text-gray-400 font-normal">(optional, max {MAX_FILES} images, 10MB each)</span></p>
-        <div
-          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#006400] transition-colors"
-          onClick={() => fileInputRef.current?.click()}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
-          role="button"
-          tabIndex={0}
-          aria-label="Upload photos — click or drag and drop"
-          onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
-        >
-          <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4-4 4 4 4-6 4 6M4 20h16M4 4h16v12H4z" />
-          </svg>
-          <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="sr-only"
-            aria-label="Upload photos"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-        </div>
-        {fileError && <p role="alert" className="mt-1 text-xs text-red-600">{fileError}</p>}
-        {files.length > 0 && (
-          <ul className="mt-3 space-y-1" aria-label="Selected photos">
-            {files.map((f, i) => (
-              <li key={i} className="flex items-center justify-between text-sm bg-gray-50 rounded px-3 py-1.5">
-                <span className="truncate text-gray-700">{f.name}</span>
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  className="ml-3 text-gray-400 hover:text-red-500 transition-colors shrink-0"
-                  aria-label={`Remove ${f.name}`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Additional details */}
-      <div>
-        <label htmlFor="additionalDetails" className={labelCls}>Additional details or specific requirements</label>
-        <textarea
-          id="additionalDetails"
-          rows={4}
-          {...register("additionalDetails")}
-          placeholder="Access notes, specific requirements, any questions for Rod"
-          className={`${inputCls} resize-y`}
-        />
+        <label htmlFor="additionalDetails" className={labelCls}>
+          Additional details or specific requirements
+          <span className="text-gray-400 font-normal"> (photos can be sent after we reply)</span>
+        </label>
+        <textarea id="additionalDetails" rows={4} {...register("additionalDetails")} placeholder="Access notes, specific requirements, any questions for Rod" className={`${inputCls} resize-y`} />
         {errors.additionalDetails && <p role="alert" className="mt-1 text-xs text-red-600">{errors.additionalDetails.message}</p>}
       </div>
 
-      {/* Terms */}
       <div>
         <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            aria-required="true"
-            {...register("acceptTerms")}
-            className="mt-0.5 accent-[#006400]"
-          />
+          <input type="checkbox" aria-required="true" {...register("acceptTerms")} className="mt-0.5 accent-[#006400]" />
           <span className="text-sm text-gray-600">
             I have read and accept the{" "}
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#006400] underline">
-              terms and conditions
-            </a>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#006400] underline">terms and conditions</a>
             , including the booking deposit requirement.
           </span>
         </label>
         {errors.acceptTerms && <p role="alert" className="mt-1 text-xs text-red-600">{errors.acceptTerms.message}</p>}
       </div>
 
-      {serverError && (
-        <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">{serverError}</p>
-      )}
+      {serverError && <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">{serverError}</p>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full bg-[#303a4d] hover:bg-[#006400] disabled:opacity-60 text-white font-bold py-3.5 rounded-[30px] transition-colors text-sm"
-      >
+      <button type="submit" disabled={isSubmitting} className="w-full bg-[#303a4d] hover:bg-[#006400] disabled:opacity-60 text-white font-bold py-3.5 rounded-[30px] transition-colors text-sm">
         {isSubmitting ? "Sending…" : "Send enquiry"}
       </button>
     </form>
