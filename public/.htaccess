@@ -1,10 +1,10 @@
 PassengerEnabled off
 DirectoryIndex index.html
-Options -MultiViews
+
+ErrorDocument 404 /404.html
 
 RewriteEngine On
 RewriteBase /
-RewriteRule ^([^/]+)/?$ $1/index.html [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.html [L]
+RewriteRule ^(.*)$ /$1/index.html [L]
