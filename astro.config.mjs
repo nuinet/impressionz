@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://impressionz.co.nz",
-  output: "server",
+  output: "static",
   adapter: node({
     mode: "standalone",
   }),

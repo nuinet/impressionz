@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Page not found — ImpressioNZ Outdoors"
+  description="The page you're looking for doesn't exist."
+>
+  <section class="min-h-[70vh] flex items-center justify-center py-20">
+    <div class="max-w-lg mx-auto px-4 text-center">
+      <p class="font-serif text-8xl font-bold text-[#90ee90] mb-4">404</p>
+      <h1 class="font-serif text-3xl font-bold mb-4">Page not found</h1>
+      <p class="text-gray-600 mb-8">
+        This page doesn't exist. It may have moved, or the link might be wrong.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/" class="bg-[#303a4d] hover:bg-[#006400] text-white font-bold px-6 py-3 rounded-[30px] transition-colors">
+          Back to home
+        </a>
+        <a href="/contact" class="bg-[#90ee90] text-[#303a4d] hover:bg-[#006400] hover:text-white font-bold px-6 py-3 rounded-[30px] transition-colors">
+          Contact us
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

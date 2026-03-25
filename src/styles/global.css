@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/* Self-hosted Merriweather */
+@font-face {
+  font-family: "Merriweather";
+  src: url("/fonts/Merriweather-VariableFont.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Merriweather";
+  src: url("/fonts/Merriweather-Italic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 @theme {
   --color-brand-dark: #006400;
   --color-brand-mid: #2d6a4f;
@@ -47,12 +64,10 @@
     transform: translateX(2.5rem);
   }
 
-  /* Delay variants */
   [data-animate-delay="100"] { transition-delay: 100ms; }
   [data-animate-delay="200"] { transition-delay: 200ms; }
   [data-animate-delay="300"] { transition-delay: 300ms; }
 
-  /* Visible state — added by IntersectionObserver */
   [data-animate].is-visible {
     opacity: 1;
     transform: none;

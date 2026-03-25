@@ -8,16 +8,54 @@ interface Props {
   description?: string;
   canonical?: string;
   ogImage?: string;
+  schema?: object | object[];
 }
 
 const {
   title,
   description = "Professional garden creation and maintenance in Auckland. Transforming outdoor spaces for over 10 years.",
   canonical,
-  ogImage = "/images/og-default.jpg",
+  ogImage = "/images/propuesta_portada-2.jpg",
+  schema,
 } = Astro.props;
 
 const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const ogImageURL = new URL(ogImage, Astro.site).href;
+
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LandscapingBusiness",
+  "@id": "https://impressionz.co.nz/#business",
+  name: "ImpressioNZ Outdoors",
+  description:
+    "Professional garden creation and maintenance in Auckland. Sole trader — you deal directly with Rod MacKenzie.",
+  url: "https://impressionz.co.nz",
+  telephone: "+64210283 4953",
+  email: "impressionzoutdoors@gmail.com",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Auckland",
+    addressRegion: "Auckland",
+    addressCountry: "NZ",
+  },
+  areaServed: {
+    "@type": "City",
+    name: "Auckland",
+  },
+  priceRange: "$$",
+  image: "https://impressionz.co.nz/images/propuesta_portada-2.jpg",
+  logo: "https://impressionz.co.nz/images/Logo.png",
+  founder: {
+    "@type": "Person",
+    name: "Rod MacKenzie",
+  },
+  sameAs: ["https://www.facebook.com/profile.php?id=61573614954159"],
+};
+
+const schemas = [
+  localBusinessSchema,
+  ...(schema ? (Array.isArray(schema) ? schema : [schema]) : []),
+];
 ---
 
 <!doctype html>
@@ -26,6 +64,8 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#006400" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Open Graph -->
@@ -33,21 +73,38 @@ const canonicalURL = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site).href} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:locale" content="en_NZ" />
+    <meta property="og:site_name" content="ImpressioNZ Outdoors" />
 
-    <!-- Fonts -->
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Self-hosted Merriweather (already in /public/fonts/) -->
+    <!-- Inter loaded from Google Fonts with display=swap -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
 
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <title>{title}</title>
+
+    <!-- Structured data -->
+    {schemas.map((s) => (
+      <script type="application/ld+json" set:html={JSON.stringify(s)} />
+    ))}
   </head>
   <body class="bg-white text-[--color-ink]">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-white focus:text-[#006400] focus:px-4 focus:py-2 focus:rounded focus:shadow-lg focus:font-medium">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-white focus:text-[#006400] focus:px-4 focus:py-2 focus:rounded focus:shadow-lg focus:font-medium"
+    >
       Skip to main content
     </a>
     <Header />
