@@ -20,7 +20,11 @@
       "Bash(wc -c /c/Users/Jack/repos/Rod/dist/_astro/*.woff2)",
       "Bash(npx wrangler:*)",
       "Bash(npm show:*)",
-      "Bash(node -e \"console.log\\(require\\(''./node_modules/astro/package.json''\\).version\\)\")"
+      "Bash(node -e \"console.log\\(require\\(''./node_modules/astro/package.json''\\).version\\)\")",
+      "WebFetch(domain:keystatic.com)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:vedantbhagwat.com)"
     ]
   }
 }

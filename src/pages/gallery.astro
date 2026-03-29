@@ -3,9 +3,14 @@ import Layout from "../layouts/Layout.astro";
 import { getCollection } from "astro:content";
 
 const rawGallery = await getCollection("gallery");
-const images = rawGallery
+const items = rawGallery
   .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
-  .map((e) => ({ src: `/images/${e.data.image}`, alt: e.data.alt }));
+  .map((e) => ({
+    src: `/images/${e.data.image}`,
+    alt: e.data.alt,
+    mediaType: e.data.mediaType ?? "image",
+    videoUrl: e.data.videoUrl ?? null,
+  }));
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -27,18 +32,27 @@ const breadcrumbSchema = {
     <p class="text-gray-600 mb-10">A selection of garden transformations and projects across Auckland.</p>
 
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {images.map((img, i) => (
+      {items.map((item, i) => (
         <button
-          class="group aspect-[4/3] overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-[#006400]"
+          class="group relative aspect-[4/3] overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-[#006400]"
           data-gallery-index={i}
-          aria-label={`View ${img.alt}`}
+          aria-label={`View ${item.alt}`}
         >
           <img
-            src={img.src}
-            alt={img.alt}
+            src={item.src}
+            alt={item.alt}
             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
+          {item.mediaType === "video" && (
+            <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
+              <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                <svg class="w-6 h-6 text-[#006400] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </div>
+          )}
         </button>
       ))}
     </div>
@@ -72,8 +86,16 @@ const breadcrumbSchema = {
       </svg>
     </button>
 
-    <div class="max-w-5xl max-h-[85vh] mx-16 flex items-center justify-center">
+    <div class="max-w-5xl max-h-[85vh] mx-16 flex items-center justify-center w-full">
       <img id="lb-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded" />
+      <iframe
+        id="lb-video"
+        class="hidden w-full aspect-video rounded"
+        style="max-height: 75vh;"
+        src=""
+        allow="autoplay; fullscreen"
+        allowfullscreen
+      ></iframe>
     </div>
 
     <button
@@ -90,11 +112,21 @@ const breadcrumbSchema = {
   </div>
 </Layout>
 
-<script define:vars={{ galleryImages: images }}>
+<script define:vars={{ galleryItems: items }}>
   const lightbox = document.getElementById("lightbox");
   const lbImg = document.getElementById("lb-img");
+  const lbVideo = document.getElementById("lb-video");
   const lbCounter = document.getElementById("lb-counter");
   let current = 0;
+
+  function getEmbedUrl(url) {
+    if (!url) return null;
+    const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+    return url;
+  }
 
   function open(index) {
     current = index;
@@ -109,17 +141,27 @@ const breadcrumbSchema = {
     lightbox.classList.add("hidden");
     lightbox.classList.remove("flex");
     document.body.style.overflow = "";
+    lbVideo.src = "";
   }
 
   function update() {
-    const img = galleryImages[current];
-    lbImg.src = img.src;
-    lbImg.alt = img.alt;
-    lbCounter.textContent = `${current + 1} / ${galleryImages.length}`;
+    const item = galleryItems[current];
+    lbCounter.textContent = `${current + 1} / ${galleryItems.length}`;
+    if (item.mediaType === "video" && item.videoUrl) {
+      lbImg.classList.add("hidden");
+      lbVideo.classList.remove("hidden");
+      lbVideo.src = getEmbedUrl(item.videoUrl);
+    } else {
+      lbVideo.classList.add("hidden");
+      lbVideo.src = "";
+      lbImg.classList.remove("hidden");
+      lbImg.src = item.src;
+      lbImg.alt = item.alt;
+    }
   }
 
-  function prev() { current = (current - 1 + galleryImages.length) % galleryImages.length; update(); }
-  function next() { current = (current + 1) % galleryImages.length; update(); }
+  function prev() { current = (current - 1 + galleryItems.length) % galleryItems.length; update(); }
+  function next() { current = (current + 1) % galleryItems.length; update(); }
 
   document.querySelectorAll("[data-gallery-index]").forEach((btn) => {
     btn.addEventListener("click", () => open(Number(btn.dataset.galleryIndex)));

@@ -1,6 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import ContactForm from "../components/ContactForm";
+import { getCollection } from "astro:content";
+
+const contactCollection = await getCollection("contact");
+const info = contactCollection[0]!.data;
 
 const breadcrumb = {
   "@context": "https://schema.org",
@@ -41,7 +45,7 @@ const breadcrumb = {
               </svg>
               <div>
                 <p class="font-medium text-gray-900">Phone</p>
-                <a href="tel:+64210283​4953" class="text-[--color-brand-dark] hover:underline">021 0283 4953</a>
+                <a href={`tel:${info.phone.replace(/\s/g, "")}`} class="text-[--color-brand-dark] hover:underline">{info.phone}</a>
               </div>
             </li>
             <li class="flex gap-3 items-start">
@@ -50,7 +54,7 @@ const breadcrumb = {
               </svg>
               <div>
                 <p class="font-medium text-gray-900">WhatsApp</p>
-                <a href="https://wa.me/64210283​4953" target="_blank" rel="noopener noreferrer" class="text-[--color-brand-dark] hover:underline">021 0283 4953</a>
+                <a href={`https://wa.me/64${info.phone.replace(/^0/, "").replace(/\s/g, "")}`} target="_blank" rel="noopener noreferrer" class="text-[--color-brand-dark] hover:underline">{info.phone}</a>
               </div>
             </li>
             <li class="flex gap-3 items-start">
@@ -59,7 +63,7 @@ const breadcrumb = {
               </svg>
               <div>
                 <p class="font-medium text-gray-900">Email</p>
-                <a href="mailto:impressionzoutdoors@gmail.com" class="text-[--color-brand-dark] hover:underline break-all">impressionzoutdoors@gmail.com</a>
+                <a href={`mailto:${info.email}`} class="text-[--color-brand-dark] hover:underline break-all">{info.email}</a>
               </div>
             </li>
             <li class="flex gap-3 items-start">
@@ -68,7 +72,7 @@ const breadcrumb = {
               </svg>
               <div>
                 <p class="font-medium text-gray-900">Facebook</p>
-                <a href="https://www.facebook.com/profile.php?id=61573614954159" target="_blank" rel="noopener noreferrer" class="text-[--color-brand-dark] hover:underline">ImpressioNZ Outdoors</a>
+                <a href={info.facebookUrl} target="_blank" rel="noopener noreferrer" class="text-[--color-brand-dark] hover:underline">{info.facebookLabel}</a>
               </div>
             </li>
           </ul>
@@ -83,10 +87,10 @@ const breadcrumb = {
             <li>• When you'd like work to happen</li>
           </ul>
           <p class="mt-3 text-gray-600 text-xs font-medium">
-            Primarily serving: North Shore, Browns Bay, and surrounding Auckland suburbs.
+            {info.serviceArea}
           </p>
           <p class="mt-2 text-gray-500 text-xs">
-            A booking deposit is required to secure your date.
+            {info.depositNote}
             See <a href="/terms" class="text-[--color-brand-dark] underline">terms & conditions</a> for details.
           </p>
         </div>

@@ -3,8 +3,11 @@ import Layout from "../layouts/Layout.astro";
 import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
 
-const pagesCollection = await getCollection("pages");
-const home = pagesCollection[0]!.data;
+const homeCollection = await getCollection("home");
+const home = homeCollection[0]!.data;
+
+const rawTestimonials = await getCollection("testimonials");
+const testimonials = rawTestimonials.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
 import HeroImg from "../assets/images/propuesta_portada-2.jpg";
 import LandscapingImg from "../assets/images/Landscaping.jpg";
 import PathImg from "../assets/images/path.jpg";
@@ -157,23 +160,7 @@ import ProfileImg from "../assets/images/profile.jpg";
     <div class="max-w-6xl mx-auto px-4">
       <h2 class="font-serif text-3xl md:text-4xl font-bold text-center mb-12">What clients say</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          {
-            quote: "Rod transformed our overgrown backyard into something we actually want to spend time in. Turned up when he said he would, no surprise charges at the end.",
-            name: "Sarah M.",
-            suburb: "Devonport",
-          },
-          {
-            quote: "We had a big stump and a mess of old fencing that had been sitting there for years. Rod cleared the lot in a day. Highly recommend.",
-            name: "James T.",
-            suburb: "Browns Bay",
-          },
-          {
-            quote: "Great communication from start to finish. Rod advised us on which plants would actually survive our conditions rather than just selling us something. Garden looks amazing.",
-            name: "Karen H.",
-            suburb: "Takapuna",
-          },
-        ].map(({ quote, name, suburb }) => (
+        {testimonials.map(({ data: { quote, name, suburb } }) => (
           <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
             <svg class="w-8 h-8 text-[#006400] mb-4" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true">
               <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm14 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>

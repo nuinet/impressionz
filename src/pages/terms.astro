@@ -1,5 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const termsCollection = await getCollection("terms");
+const { items } = termsCollection[0]!.data;
 
 const breadcrumb = {
   "@context": "https://schema.org",
@@ -27,54 +31,11 @@ const breadcrumb = {
     <div class="max-w-3xl mx-auto px-4">
       <div class="prose prose-green max-w-none text-gray-700 space-y-6 text-sm leading-relaxed">
         <ol class="space-y-6 list-decimal list-outside pl-5">
-          <li>
-            <strong>Scope of work.</strong> Only the items listed in the written quotation are included in the agreed price.
-            Additional work requested during the job will be quoted separately before being undertaken.
-          </li>
-          <li>
-            <strong>Property access.</strong> The client must ensure clear access to the work area before the job commences.
-            This includes removing vehicles, unlocking gates, and clearing any obstacles not mentioned in the quote.
-            Delays caused by access issues may affect scheduling.
-          </li>
-          <li>
-            <strong>Waste removal.</strong> Waste removal pricing is based on the volume of waste visible at the time of
-            quoting. Only green/organic garden waste is included unless otherwise specified. Domestic waste, treated timber,
-            concrete, and soil are excluded unless explicitly quoted. Additional waste discovered during the job will be
-            quoted as a variation.
-          </li>
-          <li>
-            <strong>Hedges and elevated viewing.</strong> Standard trimming produces a tidy result from ground level. If
-            a hedge or structure is visible from above (balcony, raised deck, neighbour's elevated property) and a perfect
-            finish is required from that angle, this must be stated at quoting. This adds to the cost and time required.
-          </li>
-          <li>
-            <strong>Ownership of products.</strong> All plants, materials, and products supplied by ImpressioNZ Outdoors
-            remain our property until full payment has been received.
-          </li>
-          <li>
-            <strong>Underground services.</strong> The client is responsible for identifying and communicating the location
-            of all underground cables, pipes, irrigation lines, and drainage infrastructure before work begins.
-            ImpressioNZ Outdoors accepts no liability for damage to services that were not disclosed.
-          </li>
-          <li>
-            <strong>Tree and large plant removal.</strong> Stump removal is quoted and priced separately from tree removal.
-            Root removal must be explicitly specified — it is not included by default. Where roots affect paving, structures,
-            or drainage, a site assessment prior to quoting is required.
-          </li>
-          <li>
-            <strong>Authority and ownership.</strong> By accepting a quote and proceeding with work, the client confirms
-            that they are the property owner or have written authority from the property owner to commission the work.
-          </li>
-          <li>
-            <strong>Weed spraying.</strong> Weed spraying may be offered as a complimentary service for small areas.
-            Effectiveness depends on weather, weed type, and timing of rainfall after application. No guarantee of
-            outcome is given. Large-area spraying is quoted separately.
-          </li>
-          <li>
-            <strong>Payment.</strong> Full payment is due upon completion of work unless otherwise agreed in writing.
-            A booking deposit is required to secure your date and confirms acceptance of these terms. The deposit amount
-            will be stated in the quotation.
-          </li>
+          {items.map(({ heading, body }) => (
+            <li>
+              <strong>{heading}.</strong> {body}
+            </li>
+          ))}
         </ol>
       </div>
       <div class="mt-10">
