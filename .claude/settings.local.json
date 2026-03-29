@@ -18,7 +18,9 @@
       "Bash(ls /c/Users/Jack/repos/Rod/node_modules/@fontsource/inter/latin*.css)",
       "Bash(ls /c/Users/Jack/repos/Rod/dist/_astro/*.woff2)",
       "Bash(wc -c /c/Users/Jack/repos/Rod/dist/_astro/*.woff2)",
-      "Bash(npx wrangler:*)"
+      "Bash(npx wrangler:*)",
+      "Bash(npm show:*)",
+      "Bash(node -e \"console.log\\(require\\(''./node_modules/astro/package.json''\\).version\\)\")"
     ]
   }
 }

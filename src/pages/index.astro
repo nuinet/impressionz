@@ -1,6 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+
+const pagesCollection = await getCollection("pages");
+const home = pagesCollection[0]!.data;
 import HeroImg from "../assets/images/propuesta_portada-2.jpg";
 import LandscapingImg from "../assets/images/Landscaping.jpg";
 import PathImg from "../assets/images/path.jpg";
@@ -31,10 +35,10 @@ import ProfileImg from "../assets/images/profile.jpg";
     </div>
     <div class="relative z-10 max-w-3xl mx-auto px-4 text-center text-white">
       <h1 class="font-serif text-4xl md:text-6xl font-bold leading-tight mb-6">
-        Garden creation and Maintenance in Auckland
+        {home.heroTitle}
       </h1>
       <p class="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-        Transforming your outdoor spaces into beautiful, functional gardens for over 10 years. 100+ satisfied clients. Quick response and proven results.
+        {home.heroSubtitle}
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a
@@ -73,12 +77,9 @@ import ProfileImg from "../assets/images/profile.jpg";
           About ImpressioNZ Gardening
         </h2>
         <div class="space-y-4 text-gray-600 leading-relaxed">
-          <p>
-            If your outdoor space is getting out of hand—whether maintenance is overwhelming or it's overdue for a big cleanup—we work with you to make things right. We specialize in transforming neglected spaces into gardens that increase property value and create places you'll love to spend time.
-          </p>
-          <p>
-            Our expertise covers plant choice, maintenance, and planting—grass, hedges, or gardens. We can work with what you have, introduce new elements, and clear all forms of organic waste. We focus on clarity, document our work, and set expectations clearly before starting. Every client gets the price promised—no surprise charges. Currently serving the North Shore, Browns Bay, and wider Auckland area.
-          </p>
+          {home.aboutBody.split("\n\n").map((para: string) => (
+            <p>{para}</p>
+          ))}
         </div>
         <a
           href="/contact"
@@ -232,7 +233,7 @@ import ProfileImg from "../assets/images/profile.jpg";
     </div>
     <div class="relative z-10 max-w-2xl mx-auto px-4 text-center text-white">
       <h2 class="font-serif text-3xl md:text-4xl font-bold mb-8">
-        Ready for a Garden Transformation?
+        {home.ctaHeading}
       </h2>
       <a
         href="/contact"

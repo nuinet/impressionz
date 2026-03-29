@@ -1,17 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
 
-const images = [
-  { src: "/images/Landscaping.jpg", alt: "Landscaping project" },
-  { src: "/images/path.jpg", alt: "Garden path" },
-  { src: "/images/planting.jpg", alt: "Planting" },
-  { src: "/images/stairs.jpg", alt: "Garden stairs" },
-  { src: "/images/piscina.jpg", alt: "Garden with pool area" },
-  { src: "/images/Antes 1.jpg", alt: "Before — garden transformation" },
-  { src: "/images/Después 1.jpg", alt: "After — garden transformation" },
-  { src: "/images/Gardening.jpg", alt: "Gardening work" },
-  { src: "/images/P1040435.jpg", alt: "Garden project" },
-];
+const rawGallery = await getCollection("gallery");
+const images = rawGallery
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
+  .map((e) => ({ src: `/images/${e.data.image}`, alt: e.data.alt }));
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -96,31 +90,19 @@ const breadcrumbSchema = {
   </div>
 </Layout>
 
-<script>
-  const images = [
-    { src: "/images/Landscaping.jpg", alt: "Landscaping project" },
-    { src: "/images/path.jpg", alt: "Garden path" },
-    { src: "/images/planting.jpg", alt: "Planting" },
-    { src: "/images/stairs.jpg", alt: "Garden stairs" },
-    { src: "/images/piscina.jpg", alt: "Garden with pool area" },
-    { src: "/images/Antes 1.jpg", alt: "Before — garden transformation" },
-    { src: "/images/Después 1.jpg", alt: "After — garden transformation" },
-    { src: "/images/Gardening.jpg", alt: "Gardening work" },
-    { src: "/images/P1040435.jpg", alt: "Garden project" },
-  ];
-
-  const lightbox = document.getElementById("lightbox")!;
-  const lbImg = document.getElementById("lb-img") as HTMLImageElement;
-  const lbCounter = document.getElementById("lb-counter")!;
+<script define:vars={{ galleryImages: images }}>
+  const lightbox = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lb-img");
+  const lbCounter = document.getElementById("lb-counter");
   let current = 0;
 
-  function open(index: number) {
+  function open(index) {
     current = index;
     update();
     lightbox.classList.remove("hidden");
     lightbox.classList.add("flex");
     document.body.style.overflow = "hidden";
-    document.getElementById("lb-close")!.focus();
+    document.getElementById("lb-close").focus();
   }
 
   function close() {
@@ -130,26 +112,24 @@ const breadcrumbSchema = {
   }
 
   function update() {
-    const img = images[current]!;
+    const img = galleryImages[current];
     lbImg.src = img.src;
     lbImg.alt = img.alt;
-    lbCounter.textContent = `${current + 1} / ${images.length}`;
+    lbCounter.textContent = `${current + 1} / ${galleryImages.length}`;
   }
 
-  function prev() { current = (current - 1 + images.length) % images.length; update(); }
-  function next() { current = (current + 1) % images.length; update(); }
+  function prev() { current = (current - 1 + galleryImages.length) % galleryImages.length; update(); }
+  function next() { current = (current + 1) % galleryImages.length; update(); }
 
   document.querySelectorAll("[data-gallery-index]").forEach((btn) => {
-    btn.addEventListener("click", () => open(Number((btn as HTMLElement).dataset.galleryIndex)));
+    btn.addEventListener("click", () => open(Number(btn.dataset.galleryIndex)));
   });
 
-  document.getElementById("lb-close")!.addEventListener("click", close);
-  document.getElementById("lb-prev")!.addEventListener("click", prev);
-  document.getElementById("lb-next")!.addEventListener("click", next);
+  document.getElementById("lb-close").addEventListener("click", close);
+  document.getElementById("lb-prev").addEventListener("click", prev);
+  document.getElementById("lb-next").addEventListener("click", next);
 
-  lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox) close();
-  });
+  lightbox.addEventListener("click", (e) => { if (e.target === lightbox) close(); });
 
   document.addEventListener("keydown", (e) => {
     if (lightbox.classList.contains("hidden")) return;
