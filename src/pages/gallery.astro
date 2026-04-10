@@ -7,7 +7,7 @@ const items = rawGallery
   .filter((e) => e.data.image || e.data.videoUrl)
   .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
   .map((e) => ({
-    src: `/images/${e.data.image}`,
+    src: e.data.image!,
     alt: e.data.alt,
     mediaType: e.data.mediaType ?? "image",
     videoUrl: e.data.videoUrl ?? null,
