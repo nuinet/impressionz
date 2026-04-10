@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormRegister } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState, useRef } from "react";
@@ -47,7 +47,8 @@ function RadioGroup({
 }: {
   name: string;
   options: { value: string; label: string }[];
-  register: ReturnType<typeof useForm>["register"];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  register: UseFormRegister<any>;
   error?: string;
   grid?: boolean;
 }) {

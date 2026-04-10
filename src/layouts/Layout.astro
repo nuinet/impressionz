@@ -98,7 +98,7 @@ const schemas = [
 
     <!-- Structured data -->
     {schemas.map((s) => (
-      <script type="application/ld+json" set:html={JSON.stringify(s)} />
+      <script type="application/ld+json" set:html={JSON.stringify(s)} is:inline />
     ))}
   </head>
   <body class="bg-white text-[--color-ink]">
