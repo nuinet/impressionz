@@ -9,7 +9,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "i
 
 const schema = z.object({
   name: z.string().min(2, "Please enter your name"),
-  email: z.string().email("Please enter a valid email address"),
+  email: z.string().email({ message: "Please enter a valid email address" }),
   phone: z.string().optional(),
   suburb: z.string().min(2, "Please enter your suburb or address"),
   propertyOwner: z.enum(["yes", "no"], { error: "Please select an option" }),
