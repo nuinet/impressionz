@@ -9,8 +9,8 @@ The website for Rod MacKenzie's gardening and landscaping business. Built with A
 | Repo | Purpose | URL |
 |------|---------|-----|
 | [nuinet/impressionz](https://github.com/nuinet/impressionz) (this repo) | Astro website source | impressionz.co.nz |
-| [nuinet/impressionz-admin](https://github.com/nuinet/impressionz-admin) | Keystatic CMS | admin.impressionz.co.nz |
-| [nuinet/impressionz-worker](https://github.com/nuinet/impressionz-worker) | Cloudflare Worker — contact form & feed proxy | — |
+| [nuinet/impressionz-admin](https://github.com/nuinet/impressionz-admin) | Keystatic CMS | admin.impressionz.co.nz & https://impressionz-admin.pages.dev/|
+| [nuinet/impressionz-worker](https://github.com/nuinet/impressionz-worker) | Cloudflare Worker (contact form emails) | impressionz-worker.jackdaun.workers.dev/ |
 
 ---
 
