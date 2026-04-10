@@ -4,6 +4,7 @@ import { getCollection } from "astro:content";
 
 const rawGallery = await getCollection("gallery");
 const items = rawGallery
+  .filter((e) => e.data.image || e.data.videoUrl)
   .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
   .map((e) => ({
     src: `/images/${e.data.image}`,

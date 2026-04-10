@@ -1,10 +1,11 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
+import { z } from "zod";
 import { glob } from "astro/loaders";
 
 const gallery = defineCollection({
   loader: glob({ pattern: "*.yaml", base: "./src/content/gallery" }),
   schema: z.object({
-    image: z.string(),
+    image: z.string().optional(),
     alt: z.string(),
     caption: z.string().optional().default(""),
     order: z.number().default(99),
