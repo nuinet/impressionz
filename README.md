@@ -14,6 +14,54 @@ The website for Rod MacKenzie's gardening and landscaping business. Built with A
 
 ---
 
+## Developer overview
+
+### Stack
+
+| Layer | Tech | Notes |
+|-------|------|-------|
+| Framework | Astro 5 (SSG) | Fully static output — no server, no runtime Node |
+| Styling | Tailwind CSS v4 (Vite plugin) | Config via `@theme` in `global.css`, not `tailwind.config.*` |
+| Contact form | React (island) + react-hook-form + Zod | `client:only="react"` — not SSR'd |
+| Content | YAML files in `src/content/` | Typed via Zod schemas in `content.config.ts` |
+| Blog | Substack RSS feed | Fetched and parsed at build time in `src/lib/substack.ts`; no database |
+| Email | Cloudflare Worker → Resend API | Worker repo: `impressionz-worker` |
+| CMS | Keystatic Cloud → GitHub commits | Admin repo: `impressionz-admin` |
+| Hosting | Plesk (static files) | Served from the `dist` branch, not `main` |
+| CI/CD | GitHub Actions | Builds on push to `main` + daily cron at 8am NZST |
+
+### How the pieces connect
+
+```
+Rod edits content
+  → Keystatic (admin.impressionz.co.nz)
+  → commits YAML/images to nuinet/impressionz (main branch)
+  → triggers GHA workflow
+  → `npm run build` (Astro fetches Substack RSS, bakes everything to /dist)
+  → GHA force-pushes /dist to the `dist` branch
+  → GHA POSTs to Plesk webhook → Plesk pulls dist branch → live
+
+Visitor submits contact form
+  → POST JSON to Cloudflare Worker (URL baked in at build time as PUBLIC_WORKER_URL)
+  → Worker validates, calls Resend API
+  → Email delivered to impressionzoutdoors@gmail.com with reply-to set to visitor
+
+Daily cron (8am NZST via GHA schedule)
+  → same build pipeline as above
+  → picks up any new Substack posts published since last build
+```
+
+### Key things that aren't obvious
+
+- **Blog posts are static.** `getStaticPaths` in `blog/[slug].astro` calls `getPosts()` at build time. New Substack posts appear after the next build — either triggered by a content edit or the daily cron. No rebuild = no new posts.
+- **`PUBLIC_WORKER_URL` is baked in at build time** as a `PUBLIC_` env var (exposed to the client bundle). It's set as a GitHub Actions secret. Locally you need a `.env` file with it, or the form POST goes to `undefined/contact`.
+- **The `dist` branch has no history** (`force_orphan: true` in GHA). Don't branch from it.
+- **Plesk serves the `dist` branch root directly** — document root is `.`, not `dist/`. The branch root *is* the built files.
+- **Keystatic writes to this repo** (`nuinet/impressionz`), not to the admin repo (`nuinet/impressionz-admin`). The admin app is just the UI shell.
+- **CORS on the Worker is browser-enforced only.** `ALLOWED_ORIGINS` stops browser requests from other origins; it can't block server-to-server POSTs. The `validate()` function in the worker is the real payload guard.
+
+---
+
 ## How content updates work
 
 1. Log in to the CMS at **[admin.impressionz.co.nz](https://admin.impressionz.co.nz)**
