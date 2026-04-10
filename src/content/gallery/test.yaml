@@ -1,0 +1,5 @@
+image: /images/test/image.jpg
+alt: test image
+caption: testing
+order: 99
+mediaType: image
