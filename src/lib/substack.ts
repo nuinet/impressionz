@@ -96,7 +96,9 @@ function parseItems(xml: string): SubstackPost[] {
 
 export async function getPosts(): Promise<SubstackPost[]> {
   try {
-    const res = await fetch(FEED_URL);
+    const res = await fetch(FEED_URL, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; impressionz-build/1.0)" },
+    });
     if (!res.ok) {
       console.warn(`[substack] Feed returned ${res.status}`);
       return [];
