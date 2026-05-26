@@ -1,17 +1,39 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import BeforeAfterSlider from "../components/BeforeAfterSlider.astro";
 import { getCollection } from "astro:content";
 
 const rawGallery = await getCollection("gallery");
+
 const items = rawGallery
-  .filter((e) => e.data.image || e.data.videoUrl)
+  .filter((e) => {
+    const d = e.data.media.discriminant;
+    if (d === "image") return !!e.data.media.value.image;
+    if (d === "video") return !!(e.data.media.value as { videoUrl?: string }).videoUrl;
+    if (d === "before-after") {
+      const v = e.data.media.value as { beforeImage?: string; afterImage?: string };
+      return !!(v.beforeImage && v.afterImage);
+    }
+    return false;
+  })
   .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
-  .map((e) => ({
-    src: e.data.image!,
-    alt: e.data.alt,
-    mediaType: e.data.mediaType ?? "image",
-    videoUrl: e.data.videoUrl ?? null,
-  }));
+  .map((e) => {
+    const d = e.data.media;
+    const type = d.discriminant;
+    const imgVal = d.value as { image?: string };
+    const vidVal = d.value as { image?: string; videoUrl?: string };
+    const baVal = d.value as { beforeImage?: string; afterImage?: string };
+    return {
+      src: type === "image" ? (imgVal.image ?? null) : type === "video" ? (vidVal.image ?? null) : null,
+      alt: e.data.alt,
+      title: e.data.title,
+      description: e.data.description ?? "",
+      mediaType: type as "image" | "video" | "before-after",
+      videoUrl: type === "video" ? (vidVal.videoUrl ?? null) : null,
+      beforeImage: type === "before-after" ? (baVal.beforeImage ?? null) : null,
+      afterImage: type === "before-after" ? (baVal.afterImage ?? null) : null,
+    };
+  });
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -39,20 +61,44 @@ const breadcrumbSchema = {
           data-gallery-index={i}
           aria-label={`View ${item.alt}`}
         >
-          <img
-            src={item.src}
-            alt={item.alt}
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-          {item.mediaType === "video" && (
-            <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
-              <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                <svg class="w-6 h-6 text-[#006400] ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
+          {item.mediaType === "before-after" ? (
+            <div class="flex w-full h-full">
+              <div class="w-1/2 overflow-hidden">
+                <img
+                  src={item.beforeImage!}
+                  alt={`Before: ${item.alt}`}
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <div class="w-px bg-white/60 shrink-0 z-10"></div>
+              <div class="w-1/2 overflow-hidden">
+                <img
+                  src={item.afterImage!}
+                  alt={`After: ${item.alt}`}
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                />
               </div>
             </div>
+          ) : (
+            <>
+              <img
+                src={item.src!}
+                alt={item.alt}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+              />
+              {item.mediaType === "video" && (
+                <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
+                  <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-[#006400] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </button>
       ))}
@@ -87,16 +133,39 @@ const breadcrumbSchema = {
       </svg>
     </button>
 
-    <div class="max-w-5xl max-h-[85vh] mx-16 flex items-center justify-center w-full">
-      <img id="lb-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded" />
-      <iframe
-        id="lb-video"
-        class="hidden w-full aspect-video rounded"
-        style="max-height: 75vh;"
-        src=""
-        allow="autoplay; fullscreen"
-        allowfullscreen
-      ></iframe>
+    <div class="flex flex-col items-center w-full px-16 max-h-[95vh]">
+      <!-- Media area -->
+      <div class="max-w-5xl w-full flex items-center justify-center">
+        <img id="lb-img" src="" alt="" class="max-w-full max-h-[70vh] object-contain rounded" />
+        <iframe
+          id="lb-video"
+          class="hidden w-full aspect-video rounded"
+          style="max-height: 70vh;"
+          src=""
+          allow="autoplay; fullscreen"
+          allowfullscreen
+        ></iframe>
+        <!-- Before-after slider slots (pre-rendered, shown/hidden by JS) -->
+        <div id="lb-ba-container" class="hidden w-full">
+          {items.map((item, i) => item.mediaType === "before-after" && (
+            <div data-ba-slot={i} style="display:none">
+              <BeforeAfterSlider
+                beforeSrc={item.beforeImage!}
+                afterSrc={item.afterImage!}
+                beforeAlt={`Before: ${item.alt}`}
+                afterAlt={`After: ${item.alt}`}
+              />
+              <p class="text-white/50 text-xs text-center mt-2">Drag to compare</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Description (centred, hidden when empty) -->
+      <div id="lb-description" class="hidden text-white/80 text-sm text-center px-4 mt-3 leading-relaxed max-w-xl"></div>
+
+      <!-- Counter -->
+      <div id="lb-counter" class="text-white text-sm font-medium mt-2"></div>
     </div>
 
     <button
@@ -108,15 +177,23 @@ const breadcrumbSchema = {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
       </svg>
     </button>
-
-    <div id="lb-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-medium"></div>
   </div>
 </Layout>
 
-<script define:vars={{ galleryItems: items }} is:inline>
+<script define:vars={{ galleryItems: items.map(e => ({
+  src: e.src,
+  alt: e.alt,
+  description: e.description,
+  mediaType: e.mediaType,
+  videoUrl: e.videoUrl,
+  beforeImage: e.beforeImage,
+  afterImage: e.afterImage,
+})) }} is:inline>
   const lightbox = document.getElementById("lightbox");
   const lbImg = document.getElementById("lb-img");
   const lbVideo = document.getElementById("lb-video");
+  const lbBaContainer = document.getElementById("lb-ba-container");
+  const lbDescription = document.getElementById("lb-description");
   const lbCounter = document.getElementById("lb-counter");
   let current = 0;
 
@@ -148,11 +225,32 @@ const breadcrumbSchema = {
   function update() {
     const item = galleryItems[current];
     lbCounter.textContent = `${current + 1} / ${galleryItems.length}`;
-    if (item.mediaType === "video" && item.videoUrl) {
+
+    // Description
+    if (item.description) {
+      lbDescription.textContent = item.description;
+      lbDescription.classList.remove("hidden");
+    } else {
+      lbDescription.textContent = "";
+      lbDescription.classList.add("hidden");
+    }
+
+    // Media
+    if (item.mediaType === "before-after") {
+      lbImg.classList.add("hidden");
+      lbVideo.classList.add("hidden");
+      lbVideo.src = "";
+      lbBaContainer.classList.remove("hidden");
+      lbBaContainer.querySelectorAll("[data-ba-slot]").forEach((slot) => {
+        slot.style.display = slot.dataset.baSlot === String(current) ? "block" : "none";
+      });
+    } else if (item.mediaType === "video" && item.videoUrl) {
+      lbBaContainer.classList.add("hidden");
       lbImg.classList.add("hidden");
       lbVideo.classList.remove("hidden");
       lbVideo.src = getEmbedUrl(item.videoUrl);
     } else {
+      lbBaContainer.classList.add("hidden");
       lbVideo.classList.add("hidden");
       lbVideo.src = "";
       lbImg.classList.remove("hidden");
