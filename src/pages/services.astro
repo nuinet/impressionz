@@ -10,14 +10,18 @@ const services = rawServices
 
 const rawGallery = await getCollection("gallery");
 const beforeAfterItems = rawGallery
-  .filter((e) => e.data.media.discriminant === "before-after")
+  .filter((e) => {
+    if (e.data.media.discriminant !== "before-after") return false;
+    const v = e.data.media.value as { beforeImage?: string; afterImage?: string };
+    return !!(v.beforeImage && v.afterImage);
+  })
   .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
   .map((e) => {
     const v = e.data.media.value as { beforeImage?: string; afterImage?: string };
     return {
       alt: e.data.alt,
-      beforeImage: v.beforeImage ?? "",
-      afterImage: v.afterImage ?? "",
+      beforeImage: v.beforeImage!,
+      afterImage: v.afterImage!,
     };
   });
 
