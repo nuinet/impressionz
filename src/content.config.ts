@@ -5,12 +5,30 @@ import { glob } from "astro/loaders";
 const gallery = defineCollection({
   loader: glob({ pattern: "*.yaml", base: "./src/content/gallery" }),
   schema: z.object({
-    image: z.string().optional(),
+    title: z.string(),
     alt: z.string(),
-    caption: z.string().optional().default(""),
+    description: z.string().optional().default(""),
     order: z.number().default(99),
-    mediaType: z.enum(["image", "video"]).default("image"),
-    videoUrl: z.string().optional(),
+    media: z.discriminatedUnion("discriminant", [
+      z.object({
+        discriminant: z.literal("image"),
+        value: z.object({ image: z.string().optional() }),
+      }),
+      z.object({
+        discriminant: z.literal("video"),
+        value: z.object({
+          image: z.string().optional(),
+          videoUrl: z.string().optional(),
+        }),
+      }),
+      z.object({
+        discriminant: z.literal("before-after"),
+        value: z.object({
+          beforeImage: z.string().optional(),
+          afterImage: z.string().optional(),
+        }),
+      }),
+    ]),
   }),
 });
 
