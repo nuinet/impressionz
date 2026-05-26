@@ -1,4 +1,7 @@
-image: /images/P1040435.jpg
+title: Garden project
 alt: Garden project
-caption: ""
 order: 9
+media:
+  discriminant: image
+  value:
+    image: /images/P1040435.jpg

@@ -1,4 +1,7 @@
-image: /images/planting.jpg
+title: Planting
 alt: Planting
-caption: ""
 order: 3
+media:
+  discriminant: image
+  value:
+    image: /images/planting.jpg

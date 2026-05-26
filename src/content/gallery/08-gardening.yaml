@@ -1,4 +1,7 @@
-image: /images/Gardening.jpg
+title: Gardening work
 alt: Gardening work
-caption: ""
 order: 8
+media:
+  discriminant: image
+  value:
+    image: /images/Gardening.jpg

@@ -1,4 +1,7 @@
-image: /images/path.jpg
+title: Garden path
 alt: Garden path
-caption: ""
 order: 2
+media:
+  discriminant: image
+  value:
+    image: /images/path.jpg

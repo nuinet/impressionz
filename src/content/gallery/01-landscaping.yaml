@@ -1,4 +1,7 @@
-image: /images/Landscaping.jpg
+title: Rod working on a garden transformation in Auckland
 alt: Rod working on a garden transformation in Auckland
-caption: ""
 order: 1
+media:
+  discriminant: image
+  value:
+    image: /images/Landscaping.jpg

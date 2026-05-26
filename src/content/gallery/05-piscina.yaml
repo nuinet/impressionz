@@ -1,4 +1,7 @@
-image: /images/piscina.jpg
+title: Garden with pool area
 alt: Garden with pool area
-caption: ""
 order: 5
+media:
+  discriminant: image
+  value:
+    image: /images/piscina.jpg

@@ -1,7 +1,10 @@
-image: /images/neat-shrub-trimming-before-and-after/image.jpg
+title: Neat shrub trimming before and after
 alt: Neat shrub trimming - before and after
-caption: >-
+description: >-
   Sample of many shrubs and trees we have neatened according to our clients'
   wishes
 order: 99
-mediaType: image
+media:
+  discriminant: image
+  value:
+    image: /images/neat-shrub-trimming-before-and-after/image.jpg

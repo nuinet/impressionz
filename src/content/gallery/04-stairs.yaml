@@ -1,4 +1,7 @@
+title: Garden stairs
 alt: Garden stairs
-caption: Stairs
 order: 4
-mediaType: image
+media:
+  discriminant: image
+  value:
+    image: ""
