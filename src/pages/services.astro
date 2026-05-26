@@ -7,6 +7,20 @@ const rawServices = await getCollection("services");
 const services = rawServices
   .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
   .map((e) => ({ id: e.id, ...e.data }));
+
+const rawGallery = await getCollection("gallery");
+const beforeAfterItems = rawGallery
+  .filter((e) => e.data.media.discriminant === "before-after")
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99))
+  .map((e) => {
+    const v = e.data.media.value as { beforeImage?: string; afterImage?: string };
+    return {
+      alt: e.data.alt,
+      beforeImage: v.beforeImage ?? "",
+      afterImage: v.afterImage ?? "",
+    };
+  });
+
 const breadcrumb = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -57,12 +71,19 @@ const serviceList = {
         <h2 class="font-serif text-3xl font-bold mb-2">Before & after</h2>
         <p class="text-gray-500">Drag the slider to compare</p>
       </div>
-      <BeforeAfterSlider
-        beforeSrc="/images/Antes 1.jpg"
-        afterSrc="/images/Después 1.jpg"
-        beforeAlt="Garden before transformation"
-        afterAlt="Garden after transformation by ImpressioNZ"
-      />
+      {beforeAfterItems.map((item) => (
+        <div class="mb-8 last:mb-0">
+          <BeforeAfterSlider
+            beforeSrc={item.beforeImage}
+            afterSrc={item.afterImage}
+            beforeAlt={`Before: ${item.alt}`}
+            afterAlt={`After: ${item.alt}`}
+          />
+        </div>
+      ))}
+      {beforeAfterItems.length === 0 && (
+        <p class="text-center text-gray-400 text-sm">No before & after photos added yet.</p>
+      )}
     </div>
   </section>
 
