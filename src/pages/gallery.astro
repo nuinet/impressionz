@@ -142,6 +142,7 @@ const breadcrumbSchema = {
           class="hidden w-full aspect-video rounded"
           style="max-height: 70vh;"
           src=""
+          title="Video player"
           allow="autoplay; fullscreen"
           allowfullscreen
         ></iframe>
@@ -165,7 +166,7 @@ const breadcrumbSchema = {
       <div id="lb-description" class="hidden text-white/80 text-sm text-center px-4 mt-3 leading-relaxed max-w-xl"></div>
 
       <!-- Counter -->
-      <div id="lb-counter" class="text-white text-sm font-medium mt-2"></div>
+      <div id="lb-counter" aria-live="polite" class="text-white text-sm font-medium mt-2"></div>
     </div>
 
     <button
@@ -274,8 +275,20 @@ const breadcrumbSchema = {
 
   document.addEventListener("keydown", (e) => {
     if (lightbox.classList.contains("hidden")) return;
-    if (e.key === "Escape") close();
-    else if (e.key === "ArrowLeft") prev();
-    else if (e.key === "ArrowRight") next();
+    if (e.target && e.target.closest && e.target.closest(".ba-root")) return;
+    if (e.key === "Escape") { close(); return; }
+    if (e.key === "ArrowLeft") { prev(); return; }
+    if (e.key === "ArrowRight") { next(); return; }
+    if (e.key === "Tab") {
+      var focusable = Array.from(lightbox.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'));
+      if (focusable.length === 0) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
   });
 </script>
