@@ -1,0 +1,9 @@
+title: Test Before and After
+alt: Interactive before and after of a shrub being trimmed.
+description: Another beautiful example of the work we are proud of.
+order: 101
+media:
+  discriminant: before-after
+  value:
+    beforeImage: /images/test-before-and-after/media/value/beforeImage.png
+    afterImage: /images/test-before-and-after/media/value/afterImage.png
