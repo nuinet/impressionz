@@ -1,0 +1,10 @@
+title: Palm Pruning
+alt: >-
+  A palm tree with both before and after pictures - where before there is a lot
+  of dead foliage and a messy shape while in the after the tree is cleaned up
+  and pruned nicely
+order: 99
+media:
+  discriminant: image
+  value:
+    image: /images/palm-pruning/media/value/image.jpg
